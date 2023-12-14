@@ -32,7 +32,6 @@
     <ClInclude Include="..\..\Include\JNetSession.h" />
     <ClInclude Include="..\..\Include\JNetStub.h" />
     <ClInclude Include="..\..\Include\JNetworkCore.h" />
-    <ClInclude Include="JNetEventHandler.h" />
     <ClInclude Include="Proxy.h" />
   </ItemGroup>
   <ItemGroup>

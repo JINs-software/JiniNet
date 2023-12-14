@@ -244,7 +244,7 @@ void JPDComiler::makeComm(std::ofstream& commHdr, std::ofstream& commCpp, const 
 	for (int i = 0; i < jpd.jps.size(); i++) {
 		if (jpd.jps[i].dir.compare(dir) == 0) {
 			commHdr << "\tstatic const RpcID RPC_" << jpd.jps[i].name << " = " << jpdEnum + i << ";" << endl;
-			commCpp << "\t\tRpc_" << jpd.jps[i].name << "," << endl;
+			commCpp << "\t\tRPC_" << jpd.jps[i].name << "," << endl;
 			cnt++;
 		}
 	}

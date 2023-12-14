@@ -8,7 +8,7 @@ int main() {
 	JPDComiler jpdcomp;
 	jpdcomp.SetPacektIDType("BYTE");
 	jpdcomp.SetPacektSizeType("BYTE");
-	string filePath = ".\\RPCFightGame.json";
+	string filePath = ".\\json\\RPCFightGame.json";
 	string output = "D:\\0. GameSeverStudy\\0. JiniNet\\RPCFightGame\\RPCFightGame\\RPC\\";
 
 	jpdcomp.CompileJPD(filePath, output);

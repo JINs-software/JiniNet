@@ -30,9 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JNetEventHandler.h">
-      <Filter>JNetEventHandler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\JNetClientEventHandler.h">
       <Filter>JNetEventHandler</Filter>
     </ClInclude>

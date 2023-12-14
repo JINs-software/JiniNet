@@ -9,8 +9,8 @@ public:
 	BYTE uniqueNum;
 
 public:
-	virtual RpcID* GetRpcList() { return nullptr; }
-	virtual int GetRpcListCount() { return 0; }
+	virtual RpcID* GetRpcList();
+	virtual int GetRpcListCount();
 
 	virtual bool ProcessReceivedMessage(HostID remote, JBuffer& jbuff);
 };
