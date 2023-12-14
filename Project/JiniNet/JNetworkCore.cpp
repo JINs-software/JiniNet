@@ -12,13 +12,16 @@ bool JNetworkCore::receiveSet()
 	FD_ZERO(&readSet);
 	FD_SET(sock, &readSet);
 	timeval tval = { 0, 0 };
-	int retSel = select(0, &readSet, nullptr, nullptr, nullptr);
+	int retSel = select(0, &readSet, nullptr, nullptr, &tval);
 	if (retSel == SOCKET_ERROR) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::ReceiveSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
 		return false;
 	}
 
 	return true;
+}
+bool JNetworkCore::sendSet() {
+	return false;
 }
 
 void JNetworkCore::clearDisconnected() {

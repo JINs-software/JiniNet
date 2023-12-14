@@ -9,6 +9,18 @@
           "Direction": "S2C",
           "Parameter": [
             {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
               "type": "uint32_t",
               "name": "ID"
             },
@@ -34,6 +46,18 @@
           "Name": "CRT_OTHER_CHARACTER",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "ID"
@@ -61,6 +85,18 @@
           "Direction": "S2C",
           "Parameter": [
             {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
               "type": "uint32_t",
               "name": "ID"
             }
@@ -78,6 +114,18 @@
           "Parameter": [
             {
               "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
+              "type": "BYTE",
               "name": "Direction"
             },
             {
@@ -94,6 +142,18 @@
           "Name": "MOVE_START",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "ID"
@@ -118,6 +178,18 @@
           "Parameter": [
             {
               "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
+              "type": "BYTE",
               "name": "Direction"
             },
             {
@@ -134,6 +206,18 @@
           "Name": "MOVE_STOP",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "ID"
@@ -164,6 +248,18 @@
           "Parameter": [
             {
               "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
+              "type": "BYTE",
               "name": "Direction"
             },
             {
@@ -181,6 +277,18 @@
           "Direction": "S2C",
           "Parameter": [
             {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
               "type": "uint32_t",
               "name": "ID"
             },
@@ -204,6 +312,18 @@
           "Parameter": [
             {
               "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
+              "type": "BYTE",
               "name": "Direction"
             },
             {
@@ -220,6 +340,18 @@
           "Name": "ATTACK2",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "ID"
@@ -244,6 +376,18 @@
           "Parameter": [
             {
               "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
+            {
+              "type": "BYTE",
               "name": "Direction"
             },
             {
@@ -260,6 +404,18 @@
           "Name": "ATTACK3",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "ID"
@@ -288,6 +444,18 @@
           "Name": "DAMAGE",
           "Direction": "S2C",
           "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "byCode"
+            },
+            {
+              "type": "BYTE",
+              "name": "bySize"
+            },
+            {
+              "type": "BYTE",
+              "name": "byType"
+            },
             {
               "type": "uint32_t",
               "name": "attker"

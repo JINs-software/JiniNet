@@ -129,8 +129,13 @@ void JPDComiler::makeProxy(std::ofstream& pxyHdr, std::ofstream& pxyCpp, const s
 			pxyCpp << "\t\t" << "uint32_t msgLen = ";
 			sizeofStr(pxyCpp, jpdef.params);
 			pxyCpp << endl;
-			pxyCpp << "\t\t" << "uint32_t hdrLen = sizeof(uniqueNum) + sizeof(" << packetSizeType << ") + sizeof(" << packetIDType << ");" << endl;
-			pxyCpp << "\t\t" << "JBuffer buff(msgLen + hdrLen);" << endl;
+			if (!oneWay) {
+				pxyCpp << "\t\t" << "uint32_t hdrLen = sizeof(uniqueNum) + sizeof(" << packetSizeType << ") + sizeof(" << packetIDType << ");" << endl;
+				pxyCpp << "\t\t" << "JBuffer buff(msgLen + hdrLen);" << endl;
+			}
+			else {
+				pxyCpp << "\t\t" << "JBuffer buff(msgLen);" << endl;
+			}
 			leftShiftStr(pxyCpp, jpdef.name, jpdef.params);
 			pxyCpp << "\t\tSend(remote, buff);" << endl << endl;
 			pxyCpp << "\t\t" << "return true;" << endl;
@@ -289,9 +294,11 @@ void JPDComiler::sizeofStr(std::ofstream& pxyCpp, const std::vector<stJParam>& p
 
 void JPDComiler::leftShiftStr(std::ofstream& pxyCpp, const std::string& pname, const std::vector<stJParam>& params)
 {
-	pxyCpp << "\t\tbuff << uniqueNum;" << endl;
-	pxyCpp << "\t\tbuff << msgLen;" << endl;
-	pxyCpp << "\t\tbuff << RPC_" << pname << ";" << endl;
+	if (!oneWay) {
+		pxyCpp << "\t\tbuff << uniqueNum;" << endl;
+		pxyCpp << "\t\tbuff << msgLen;" << endl;
+		pxyCpp << "\t\tbuff << RPC_" << pname << ";" << endl;
+	}
 	for (int i = 0; i < params.size(); i++) {
 		pxyCpp << "\t\tbuff << " << params[i].name << ";" << endl;
 	}

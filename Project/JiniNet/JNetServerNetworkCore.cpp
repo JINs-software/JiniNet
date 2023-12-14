@@ -26,16 +26,17 @@ bool JNetServerNetworkCore::receiveSet() {
 	}
 	if (setFlag) {
 		timeval tval = { 0, 0 };
-		int retSel = select(0, &remoteReadSet, nullptr, nullptr, nullptr);
+		int retSel = select(0, &remoteReadSet, nullptr, nullptr, &tval);
 		if (retSel == SOCKET_ERROR) {
 			ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::ReceiveSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
+			return false;
 		}
 	}
 
-	return setFlag;
+	return true;
 }
 bool JNetServerNetworkCore::receive() {
-	if (FD_ISSET(sock, &remoteReadSet)) {
+	if (FD_ISSET(sock, &readSet)) {
 		if (eventHandler->OnConnectRequest()) {
 
 			SOCKADDR_IN clientAddr;
@@ -112,7 +113,7 @@ bool JNetServerNetworkCore::sendSet() {
 			return false;
 		}
 	}
-	return setFlag;
+	return true;
 }
 bool JNetServerNetworkCore::send() {
 	for (auto iter : remoteMap) {
@@ -135,6 +136,7 @@ bool JNetServerNetworkCore::send() {
 						setDisconnected(iter.first);
 					}
 				}
+				client->sendBuff->DirectMoveDequeueOffset(sendLen);
 
 				len -= sendLen;
 				if (len == 0) {

@@ -129,12 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="jpd.json" />
-    <None Include="RPCFightGame.json" />
-    <None Include="test.json" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
+    <None Include="json\jpd.json" />
+    <None Include="json\RPCFightGame.json" />
+    <None Include="json\test.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

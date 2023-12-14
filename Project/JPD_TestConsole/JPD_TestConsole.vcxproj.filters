@@ -6,15 +6,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test.json">
-      <Filter>json</Filter>
-    </None>
-    <None Include="jpd.json">
-      <Filter>json</Filter>
-    </None>
-    <None Include="RPCFightGame.json" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
+    <None Include="json\jpd.json">
+      <Filter>json</Filter>
+    </None>
+    <None Include="json\RPCFightGame.json">
+      <Filter>json</Filter>
+    </None>
+    <None Include="json\test.json">
+      <Filter>json</Filter>
+    </None>
   </ItemGroup>
 </Project>

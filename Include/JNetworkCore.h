@@ -32,13 +32,16 @@ public:
 		return receive();
 	}
 	inline bool Send() {
+		if (!sendSet()) {
+			return false;
+		}
 		return send();
 	}
 
 protected:
 	virtual bool receiveSet();
 	virtual bool receive() = 0;
-	virtual bool sendSet() = 0;
+	virtual bool sendSet();
 	virtual bool send() = 0;
 
 	inline void setDisconnected(HostID remote) {
