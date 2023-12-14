@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Session">
+      <UniqueIdentifier>{db171f07-fc69-4ab8-911c-f4124dba3c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JNetEventHandler">
+      <UniqueIdentifier>{218eb33d-5029-4d80-bebb-4a88258ff377}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JNetworkCore">
+      <UniqueIdentifier>{5f98c1bc-5e6f-45c5-83cb-719d4e299288}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RPC">
+      <UniqueIdentifier>{0cb129a7-2127-4410-a99f-ab662380f1a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RPC\JNetProxy">
+      <UniqueIdentifier>{b3fde252-a08d-4d37-a4d5-7113c0cceba7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RPC\JNetStub">
+      <UniqueIdentifier>{58a1928f-25cb-437e-baf6-169650fe6020}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JiniNet">
+      <UniqueIdentifier>{cac3ad7a-fcf7-4c4e-8dda-5c6219154f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JiniNet\JNetClient">
+      <UniqueIdentifier>{252af7cb-79cc-47bd-87b8-19d029f3a764}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JiniNet\JNetServer">
+      <UniqueIdentifier>{ebd498d8-c3c0-4a7a-8ca0-f654791580bc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="JNetEventHandler.h">
+      <Filter>JNetEventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetClientEventHandler.h">
+      <Filter>JNetEventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetClient.h">
+      <Filter>JiniNet\JNetClient</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetServer.h">
+      <Filter>JiniNet\JNetServer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetClientNetworkCore.h">
+      <Filter>JNetworkCore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetServerNetworkCore.h">
+      <Filter>JNetworkCore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetProxy.h">
+      <Filter>RPC\JNetProxy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetStub.h">
+      <Filter>RPC\JNetStub</Filter>
+    </ClInclude>
+    <ClInclude Include="Proxy.h">
+      <Filter>RPC\JNetProxy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetSession.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetMsgConfig.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetRPC.h">
+      <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetworkCore.h">
+      <Filter>JNetworkCore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetEventHandler.h">
+      <Filter>JNetEventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetBatchProcess.h">
+      <Filter>JiniNet</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="JNetProxy.cpp">
+      <Filter>RPC\JNetProxy</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetStub.cpp">
+      <Filter>RPC\JNetStub</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetClient.cpp">
+      <Filter>JiniNet\JNetClient</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetServer.cpp">
+      <Filter>JiniNet\JNetServer</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetEventHandler.cpp">
+      <Filter>JNetEventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetClientEventHandler.cpp">
+      <Filter>JNetEventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetServerEventHandler.cpp">
+      <Filter>JNetEventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetworkCore.cpp">
+      <Filter>JNetworkCore</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetServerNetworkCore.cpp">
+      <Filter>JNetworkCore</Filter>
+    </ClCompile>
+    <ClCompile Include="JNetClientNetworkCore.cpp">
+      <Filter>JNetworkCore</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

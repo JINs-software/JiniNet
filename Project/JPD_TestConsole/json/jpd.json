@@ -1,0 +1,40 @@
+{
+  "JPD": [
+    {
+      "Namespace": "Snick",
+      "Enum": 100,
+      "Def": [
+        {
+          "Name": "MOVE",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "int32",
+              "name": "X"
+            },
+            {
+              "type": "int32",
+              "name": "Y"
+            },
+            {
+              "type": "BYTE",
+              "name": "Dir"
+            }
+          ],
+          "Option": 0
+        },
+        {
+          "Name": "KEYINPUT",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Key"
+            }
+          ],
+          "Option": 0
+        }
+      ]
+    }
+  ]
+}

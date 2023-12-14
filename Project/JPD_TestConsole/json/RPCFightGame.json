@@ -1,0 +1,308 @@
+{
+  "JPD": [
+    {
+      "Namespace": "FightGameCrtDel",
+      "Enum": 0,
+      "Def": [
+        {
+          "Name": "CRT_CHARACTER",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            },
+            {
+              "type": "BYTE",
+              "name": "HP"
+            }
+          ]
+        },
+        {
+          "Name": "CRT_OTHER_CHARACTER",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            },
+            {
+              "type": "BYTE",
+              "name": "HP"
+            }
+          ]
+        },
+        {
+          "Name": "DEL_CHARACTER",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "FightGameMove",
+      "Enum": 10,
+      "Def": [
+        {
+          "Name": "MOVE_START",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "MOVE_START",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "MOVE_STOP",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "MOVE_STOP",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "FightGameAttack",
+      "Enum": 20,
+      "Def": [
+        {
+          "Name": "ATTACK1",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "ATTACK1",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "ATTACK2",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "ATTACK2",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "ATTACK3",
+          "Direction": "C2S",
+          "Parameter": [
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        },
+        {
+          "Name": "ATTACK3",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "ID"
+            },
+            {
+              "type": "BYTE",
+              "name": "Direction"
+            },
+            {
+              "type": "uint16_t",
+              "name": "X"
+            },
+            {
+              "type": "uint16_t",
+              "name": "Y"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Namespace": "FightGameDamage",
+      "Enum": 30,
+      "Def": [
+        {
+          "Name": "DAMAGE",
+          "Direction": "S2C",
+          "Parameter": [
+            {
+              "type": "uint32_t",
+              "name": "attker"
+            },
+            {
+              "type": "uint32_t",
+              "name": "target"
+            },
+            {
+              "type": "BYTE",
+              "name": "targetHP"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

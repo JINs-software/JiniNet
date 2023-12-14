@@ -1,0 +1,28 @@
+{
+  "Account": [
+    {
+      "AccountNo": 1,
+      "Nickname": "테스트계정1"
+    },
+    {
+      "AccountNo": 2,
+      "Nickname": "테스트계쩡2"
+    }
+  ],
+  "Friend": [],
+  "FriendRequest": [
+    {
+      "RequestNo": 1,
+      "FromAccountNo": 1,
+      "ToAccountNo": 2,
+      "Time": 1437344611
+    },
+    {
+      "RequestNo": 2,
+      "FromAccountNo": 1,
+      "ToAccountNo": 3,
+      "Time": 1437344611
+    }
+  ]
+}
+
