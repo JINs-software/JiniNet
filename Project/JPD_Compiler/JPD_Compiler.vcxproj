@@ -20,11 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JPDComiler.cpp" />
-    <ClCompile Include="StubTemplate.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\JPDComiler.h" />
-    <ClInclude Include="ProxyTemplate.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
