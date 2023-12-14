@@ -21,8 +21,16 @@ private:
 
 public:
 	JNetServerNetworkCore();
-	inline void AttachEventHandler(JNetServerEventHandler* eventHandler);
-	inline void AttachStub(JNetStub* stub);
+	inline void AttachEventHandler(JNetServerEventHandler* eventHandler) {
+		this->eventHandler = eventHandler;
+	}
+	inline void AttachStub(JNetStub* stub) {
+		RpcID* rpcList = stub->GetRpcList();
+		int rpcListCnt = stub->GetRpcListCount();
+		for (int i = 0; i < rpcListCnt; i++) {
+			stupMap.insert({ rpcList[i], stub });
+		}
+	}
 
 	bool Start(const stServerStartParam param);
 

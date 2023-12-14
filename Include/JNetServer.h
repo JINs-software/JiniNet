@@ -23,11 +23,26 @@ private:
 public:
 	JNetServer();
 
-	inline void AttachEventHandler(JNetServerEventHandler* eventHandler);
-	inline void AttachProxy(JNetProxy* proxy, BYTE unique);
-	inline void AttachStub(JNetStub* stub, BYTE unique);
-	inline void AttachBatchProcess(JNetBatchProcess* batch);
-	inline void Start(const stServerStartParam& param);
+	inline void AttachEventHandler(JNetServerEventHandler* eventHandler) {
+		networkCore->AttachEventHandler(eventHandler);
+	}
+	inline void AttachProxy(JNetProxy* proxy, BYTE unique) {
+		proxy->netcore = networkCore;
+		proxy->uniqueNum = unique;
+	}
+	inline void AttachStub(JNetStub* stub, BYTE unique) {
+		networkCore->AttachStub(stub);
+		stub->uniqueNum = unique;
+	}
+	inline void AttachBatchProcess(JNetBatchProcess* batch) {
+		if (!batchProcess) {
+			delete batchProcess;
+		}
+		batchProcess = batch;
+	}
+	inline void Start(const stServerStartParam& param) {
+		networkCore->Start(param);
+	}
 	void FrameMove();
 
 private:

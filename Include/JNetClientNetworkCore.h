@@ -17,8 +17,16 @@ private:
 
 public:
 	JNetClientNetworkCore();
-	inline void AttachEventHandler(JNetClientEventHandler* eventHandler);
-	inline void AttachStub(JNetStub* stub);
+	inline void AttachEventHandler(JNetClientEventHandler* eventHandler) {
+		this->eventHandler = eventHandler;
+	}
+	inline void AttachStub(JNetStub* stub) {
+		RpcID* rpcList = stub->GetRpcList();
+		int rpcListCnt = stub->GetRpcListCount();
+		for (int i = 0; i < rpcListCnt; i++) {
+			stupMap.insert({ rpcList[i], stub });
+		}
+	}
 	bool Connect();
 
 private:

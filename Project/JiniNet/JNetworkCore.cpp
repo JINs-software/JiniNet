@@ -6,15 +6,6 @@ JNetworkCore::JNetworkCore() {
 	InitWindowSocketLib(&wsaData);
 	sock = CreateWindowSocket_IPv4(true);
 }
-inline bool JNetworkCore::Receive() {
-	if (!receiveSet()) {
-		return false;
-	}
-	return receive();
-}
-inline bool JNetworkCore::Send() {
-	return send();
-}
 
 bool JNetworkCore::receiveSet()
 {
@@ -30,9 +21,6 @@ bool JNetworkCore::receiveSet()
 	return true;
 }
 
-inline void JNetworkCore::setDisconnected(HostID remote) {
-	disconnectedSet.insert(remote);
-}
 void JNetworkCore::clearDisconnected() {
 	for (HostID remote : disconnectedSet) {
 		if (remoteMap.find(remote) != remoteMap.end()) {

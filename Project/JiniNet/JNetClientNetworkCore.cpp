@@ -5,16 +5,6 @@ JNetClientNetworkCore::JNetClientNetworkCore() {
 	session = new stJNetSession(sock, CLIENT_RECV_BUFF, CLIENT_SEND_BUFF);
 	remoteMap.insert({ SERVER_HOST_ID , session });
 }
-inline void JNetClientNetworkCore::AttachEventHandler(JNetClientEventHandler* eventHandler) {
-	this->eventHandler = eventHandler;
-}
-inline void JNetClientNetworkCore::AttachStub(JNetStub* stub) {
-	RpcID* rpcList = stub->GetRpcList();
-	int rpcListCnt = stub->GetRpcListCount();
-	for (int i = 0; i < rpcListCnt; i++) {
-		stupMap.insert({ rpcList[i], stub });
-	}
-}
 
 bool JNetClientNetworkCore::Connect() {
 	SOCKADDR_IN serverAddr = CreateServerADDR();

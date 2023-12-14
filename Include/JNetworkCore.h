@@ -25,8 +25,15 @@ protected:
 
 public:
 	JNetworkCore();
-	inline bool Receive();
-	inline bool Send();
+	inline bool Receive() {
+		if (!receiveSet()) {
+			return false;
+		}
+		return receive();
+	}
+	inline bool Send() {
+		return send();
+	}
 
 protected:
 	virtual bool receiveSet();
@@ -34,7 +41,9 @@ protected:
 	virtual bool sendSet() = 0;
 	virtual bool send() = 0;
 
-	inline void setDisconnected(HostID remote);
+	inline void setDisconnected(HostID remote) {
+		disconnectedSet.insert(remote);
+	}
 	void clearDisconnected();
 
 	void ERROR_EXCEPTION_WINDOW(const WCHAR* wlocation, const WCHAR* wcomment, int errcode = -999999);

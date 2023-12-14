@@ -6,16 +6,6 @@ JNetServerNetworkCore::JNetServerNetworkCore() {
 	eventHandler = new JNetServerEventHandler();
 	FD_ZERO(&remoteReadSet);
 }
-inline void JNetServerNetworkCore::AttachEventHandler(JNetServerEventHandler* eventHandler) {
-	this->eventHandler = eventHandler;
-}
-inline void JNetServerNetworkCore::AttachStub(JNetStub* stub) {
-	RpcID* rpcList = stub->GetRpcList();
-	int rpcListCnt = stub->GetRpcListCount();
-	for (int i = 0; i < rpcListCnt; i++) {
-		stupMap.insert({ rpcList[i], stub });
-	}
-}
 
 bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 	SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
