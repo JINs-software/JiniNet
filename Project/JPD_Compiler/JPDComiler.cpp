@@ -40,6 +40,13 @@ void JPDComiler::parseJPD()
 	for (SizeType i = 0; i < jpdArray.Size(); i++) {
 		Value& jpdObject = jpdArray[i];
 		stJPD jpd;
+		if (oneWay) {
+			onewayHdr.msgHdrSize = jpdObject["MsgHdrSize"].GetUint();
+			onewayHdr.msgLenOffset = jpdObject["MsgLenOffset"].GetUint();
+			onewayHdr.msgLenType = jpdObject["MsgLenType"].GetUint();
+			onewayHdr.msgIdOffset = jpdObject["MsgIdOffset"].GetUint();
+			onewayHdr.msgIdType = jpdObject["OffsetType"].GetString();
+		}
 		jpd.jpdNameSpace = jpdObject["Namespace"].GetString();
 		jpd.enumeration = jpdObject["Enum"].GetUint();
 
@@ -47,7 +54,12 @@ void JPDComiler::parseJPD()
 		for (SizeType j = 0; j < jpdefArray.Size(); j++) {
 			Value& jpdefObject = jpdefArray[j];
 			stJPDef jpdef;
-			jpdef.name = jpdefObject["Name"].GetString();
+			if (jpdefObject.HasMember("Enum")) {
+				jpdef.enumAdd = jpdefObject["Enum"].GetUint();
+			}
+			if (jpdefObject.HasMember("Name")) {
+				jpdef.name = jpdefObject["Name"].GetString();
+			}
 			jpdef.dir = jpdefObject["Direction"].GetString();
 
 			Value& jparams = jpdefObject["Parameter"];
@@ -158,12 +170,24 @@ void JPDComiler::makeStub(std::ofstream& stbHdr, std::ofstream& stbCpp, const st
 	stbHdr << "\t" << "{" << endl;
 	stbHdr << "\t" << "public: " << endl;
 	stbCpp << "\t" << "bool Stub::ProcessReceivedMessage(HostID remote, JBuffer& jbuff) {" << endl;
-	stbCpp << "\t\t" << "stMSG_HDR hdr;" << endl;
-	stbCpp << "\t\t" << "jbuff.Dequeue(reinterpret_cast<BYTE*>(&hdr), sizeof(stMSG_HDR));" << endl;
-	stbCpp << "\t\t" << "if(hdr.uniqueNum != uniqueNum) {" << endl;
-	stbCpp << "\t\t\t" << "return false;" << endl;
-	stbCpp << "\t\t" << "}" << endl << endl;
-	stbCpp << "\t\t" << "switch(hdr.msgID) {" << endl;
+	if (!oneWay) {
+		stbCpp << "\t\t" << "stMSG_HDR hdr;" << endl;
+		stbCpp << "\t\t" << "jbuff.Dequeue(reinterpret_cast<BYTE*>(&hdr), sizeof(stMSG_HDR));" << endl;
+		stbCpp << "\t\t" << "if(hdr.uniqueNum != uniqueNum) {" << endl;
+		stbCpp << "\t\t\t" << "return false;" << endl;
+		stbCpp << "\t\t" << "}" << endl << endl;
+		stbCpp << "\t\t" << "switch(hdr.msgID) {" << endl;
+	}
+	else {
+		stbCpp << "\t\tif (jbuff.GetUseSize() < " << onewayHdr.msgHdrSize << ") {" << endl;
+		stbCpp << "\t\t\t" << "return false;" << endl;
+		stbCpp << "\t\t" << "}" << endl;
+		stbCpp << "\t\t" << onewayHdr.msgLenType << " msgLen;" << endl;
+		stbCpp << "\t\t" << onewayHdr.msgIdType << " msgID;" << endl;
+		stbCpp << "\t\t" << "jbuff.Peek(" << onewayHdr.msgLenOffset << ", reinterpret_cast<BYTE*>(&msgLen), sizeof(msgLen));" << endl;
+		stbCpp << "\t\t" << "jbuff.Peek(" << onewayHdr.msgIdOffset << ", reinterpret_cast<BYTE*>(&msgID), sizeof(msgID));" << endl;
+		stbCpp << "\t\t" << "switch(static_cast<RpcID>(hdr.msgID)) {" << endl;
+	}
 	for (const stJPDef& jpdef : jpd.jps) {
 		if (jpdef.dir.compare(dir) == 0) {
 			stbHdr << "\t\t" << "virtual bool ";
@@ -247,11 +271,15 @@ void JPDComiler::makeComm(std::ofstream& commHdr, std::ofstream& commCpp, const 
 	uint16_t jpdEnum = jpd.enumeration;
 	int cnt = 0;
 	for (int i = 0; i < jpd.jps.size(); i++) {
+		if (jpd.jps[i].enumAdd != 0) {
+			jpdEnum = jpd.jps[i].enumAdd;
+		}
 		if (jpd.jps[i].dir.compare(dir) == 0) {
-			commHdr << "\tstatic const RpcID RPC_" << jpd.jps[i].name << " = " << jpdEnum + i << ";" << endl;
+			commHdr << "\tstatic const RpcID RPC_" << jpd.jps[i].name << " = " << jpdEnum << ";" << endl;
 			commCpp << "\t\tRPC_" << jpd.jps[i].name << "," << endl;
 			cnt++;
 		}
+		jpdEnum++;
 	}
 
 	commCpp << "\t};" << endl << endl;

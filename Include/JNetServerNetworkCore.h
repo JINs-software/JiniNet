@@ -18,6 +18,7 @@ private:
 	JNetServerEventHandler* eventHandler;
 	std::unordered_map<RpcID, JNetStub*> stupMap;
 	fd_set remoteReadSet;
+	bool oneway = false;
 
 public:
 	JNetServerNetworkCore();
@@ -25,10 +26,20 @@ public:
 		this->eventHandler = eventHandler;
 	}
 	inline void AttachStub(JNetStub* stub) {
-		RpcID* rpcList = stub->GetRpcList();
-		int rpcListCnt = stub->GetRpcListCount();
-		for (int i = 0; i < rpcListCnt; i++) {
-			stupMap.insert({ rpcList[i], stub });
+		if (!oneway) {
+			RpcID* rpcList = stub->GetRpcList();
+			int rpcListCnt = stub->GetRpcListCount();
+			for (int i = 0; i < rpcListCnt; i++) {
+				stupMap.insert({ rpcList[i], stub });
+			}
+		}
+		else {
+			if (!stupMap.empty()) {
+				ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::AttachStub", L"Oneway 방식에서는 하나의 스텁만이 존재할 수 있음");
+			}
+			else {
+				stupMap.insert({ ONEWAY_RPCID, stub });
+			}
 		}
 	}
 

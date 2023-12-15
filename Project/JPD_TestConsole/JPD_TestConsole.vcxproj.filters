@@ -4,6 +4,9 @@
     <Filter Include="json">
       <UniqueIdentifier>{6de09271-8f60-4163-9fd6-de0552f90ed8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sample">
+      <UniqueIdentifier>{5a8ab4b1-9f62-4a63-a883-112e24c02135}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
@@ -18,5 +21,6 @@
     <None Include="json\test.json">
       <Filter>json</Filter>
     </None>
+    <None Include="OnewayFightGame.json" />
   </ItemGroup>
 </Project>

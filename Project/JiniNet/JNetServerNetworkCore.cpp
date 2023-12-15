@@ -79,14 +79,18 @@ bool JNetServerNetworkCore::receive() {
 			else {
 				client->recvBuff->DirectMoveEnqueueOffset(recvLen);
 
-				//stub->ProcessReceivedMessage(iter.first, *client->recvBuff);
-				stMSG_HDR hdr;
-				client->recvBuff->Peek(&hdr);
-				if (stupMap.find(hdr.msgID) != stupMap.end()) {
-					stupMap[hdr.msgID]->ProcessReceivedMessage(iter.first, *client->recvBuff);
+				if (!oneway) {
+					stJMSG_HDR hdr;
+					client->recvBuff->Peek(&hdr);
+					if (stupMap.find(hdr.msgID) != stupMap.end()) {
+						stupMap[hdr.msgID]->ProcessReceivedMessage(iter.first, *client->recvBuff);
+					}
+					else {
+						ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
+					}
 				}
 				else {
-					ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
+					stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(iter.first, *client->recvBuff);
 				}
 			}
 		}

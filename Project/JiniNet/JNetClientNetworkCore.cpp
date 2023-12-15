@@ -27,7 +27,7 @@ bool JNetClientNetworkCore::receive() {
 			session->recvBuff->DirectMoveEnqueueOffset(recvLen);
 
 			//stub->ProcessReceivedMessage(SERVER_HOST_ID, *session->recvBuff);
-			stMSG_HDR hdr;
+			stJMSG_HDR hdr;
 			session->recvBuff->Peek(&hdr);
 			if (stupMap.find(hdr.msgID) != stupMap.end()) {
 				stupMap[hdr.msgID]->ProcessReceivedMessage(SERVER_HOST_ID, *session->recvBuff);

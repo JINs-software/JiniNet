@@ -52,6 +52,7 @@ public:
 	UINT	Peek(OUT BYTE* dest, UINT uiSize);	
 	template<typename T>
 	UINT	Peek(OUT T* dest) { return Peek(reinterpret_cast<BYTE*>(dest), sizeof(T)); }
+	bool	Peek(UINT offset, OUT BYTE* dest, UINT uiSize);
 
 
 	// 버퍼의 모든 데이타 삭제.
