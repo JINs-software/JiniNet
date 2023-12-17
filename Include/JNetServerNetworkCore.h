@@ -22,6 +22,7 @@ private:
 
 public:
 	JNetServerNetworkCore();
+	inline void SetOneway() { oneway = true; }
 	inline void AttachEventHandler(JNetServerEventHandler* eventHandler) {
 		this->eventHandler = eventHandler;
 	}
@@ -44,6 +45,7 @@ public:
 	}
 
 	bool Start(const stServerStartParam param);
+	bool CloseConnection(HostID clientID);
 
 private:
 	bool receiveSet() override;

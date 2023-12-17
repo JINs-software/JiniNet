@@ -133,9 +133,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="json\jpd.json" />
+    <None Include="json\OnewayFightGame.json" />
     <None Include="json\RPCFightGame.json" />
-    <None Include="json\test.json" />
-    <None Include="OnewayFightGame.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

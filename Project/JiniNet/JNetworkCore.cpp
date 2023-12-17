@@ -24,9 +24,10 @@ bool JNetworkCore::sendSet() {
 	return false;
 }
 
-void JNetworkCore::clearDisconnected() {
+void JNetworkCore::batchDisconnection() {
 	for (HostID remote : disconnectedSet) {
 		if (remoteMap.find(remote) != remoteMap.end()) {
+			delete remoteMap[remote];
 			remoteMap.erase(remote);
 			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
 		}

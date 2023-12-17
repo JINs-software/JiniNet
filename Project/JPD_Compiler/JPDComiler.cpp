@@ -43,9 +43,9 @@ void JPDComiler::parseJPD()
 		if (oneWay) {
 			onewayHdr.msgHdrSize = jpdObject["MsgHdrSize"].GetUint();
 			onewayHdr.msgLenOffset = jpdObject["MsgLenOffset"].GetUint();
-			onewayHdr.msgLenType = jpdObject["MsgLenType"].GetUint();
+			onewayHdr.msgLenType = jpdObject["MsgLenType"].GetString();
 			onewayHdr.msgIdOffset = jpdObject["MsgIdOffset"].GetUint();
-			onewayHdr.msgIdType = jpdObject["OffsetType"].GetString();
+			onewayHdr.msgIdType = jpdObject["MsgIdType"].GetString();
 		}
 		jpd.jpdNameSpace = jpdObject["Namespace"].GetString();
 		jpd.enumeration = jpdObject["Enum"].GetUint();
@@ -155,8 +155,8 @@ void JPDComiler::makeProxy(std::ofstream& pxyHdr, std::ofstream& pxyCpp, const s
 		}
 	}
 	pxyHdr << endl;
-	pxyHdr << "\t\t" << "RpcID* GetRpcList() override { return gRpcList; }" << endl;
-	pxyHdr << "\t\t" << "int GetRpcListCount() override { return gRpcListCount; }" << endl;
+	pxyHdr << "\t\t" << "virtual RpcID* GetRpcList() override { return gRpcList; }" << endl;
+	pxyHdr << "\t\t" << "virtual int GetRpcListCount() override { return gRpcListCount; }" << endl;
 	pxyHdr << "\t};" << endl << endl;
 	pxyHdr << "}" << endl << endl;
 	pxyCpp << "}" << endl << endl;
@@ -179,6 +179,7 @@ void JPDComiler::makeStub(std::ofstream& stbHdr, std::ofstream& stbCpp, const st
 		stbCpp << "\t\t" << "switch(hdr.msgID) {" << endl;
 	}
 	else {
+		stbCpp << "\t\t" << "while(true) {" << endl << endl;
 		stbCpp << "\t\tif (jbuff.GetUseSize() < " << onewayHdr.msgHdrSize << ") {" << endl;
 		stbCpp << "\t\t\t" << "return false;" << endl;
 		stbCpp << "\t\t" << "}" << endl;
@@ -186,7 +187,10 @@ void JPDComiler::makeStub(std::ofstream& stbHdr, std::ofstream& stbCpp, const st
 		stbCpp << "\t\t" << onewayHdr.msgIdType << " msgID;" << endl;
 		stbCpp << "\t\t" << "jbuff.Peek(" << onewayHdr.msgLenOffset << ", reinterpret_cast<BYTE*>(&msgLen), sizeof(msgLen));" << endl;
 		stbCpp << "\t\t" << "jbuff.Peek(" << onewayHdr.msgIdOffset << ", reinterpret_cast<BYTE*>(&msgID), sizeof(msgID));" << endl;
-		stbCpp << "\t\t" << "switch(static_cast<RpcID>(hdr.msgID)) {" << endl;
+		stbCpp << "\t\t" << "if(jbuff.GetUseSize() < " << onewayHdr.msgHdrSize << " + msgLen) {" << endl;
+		stbCpp << "\t\t\t" << "return false;" << endl;
+		stbCpp << "\t\t}" << endl << endl;
+		stbCpp << "\t\t" << "switch(static_cast<RpcID>(msgID)) {" << endl;
 	}
 	for (const stJPDef& jpdef : jpd.jps) {
 		if (jpdef.dir.compare(dir) == 0) {
@@ -225,6 +229,10 @@ void JPDComiler::makeStub(std::ofstream& stbHdr, std::ofstream& stbCpp, const st
 	stbHdr << "\t};" << endl << endl;
 	stbHdr << "}" << endl;
 	stbCpp << "\t\t" << "}" << endl;
+	if (oneWay) {
+		stbCpp << endl;
+		stbCpp << "\t\t" << "}" << endl;
+	}
 	stbCpp << "\t" << "}" << endl;
 	stbCpp << "}" << endl;
 }

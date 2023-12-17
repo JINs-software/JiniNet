@@ -12,4 +12,9 @@ struct stJNetSession {
 		recvBuff = new JBuffer(recvBuffSize);
 		sendBuff = new JBuffer(sendBuffSize);
 	}
+	~stJNetSession() {
+		closesocket(sock);
+		delete recvBuff;
+		delete sendBuff;
+	}
 };

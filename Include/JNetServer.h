@@ -21,7 +21,7 @@ private:
 	std::map<HostID, stJNetSession> sessions;
 
 public:
-	JNetServer();
+	JNetServer(bool interactive = true);
 
 	inline void AttachEventHandler(JNetServerEventHandler* eventHandler) {
 		networkCore->AttachEventHandler(eventHandler);

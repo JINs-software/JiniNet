@@ -29,13 +29,28 @@ public:
 		if (!receiveSet()) {
 			return false;
 		}
-		return receive();
+		//return receive();
+		bool ret = receive();
+		batchDisconnection();
+		return ret;
 	}
 	inline bool Send() {
 		if (!sendSet()) {
 			return false;
 		}
-		return send();
+		//return send();
+		bool ret = send();
+		batchDisconnection();
+		return ret;
+	}
+	inline bool Disconnect(HostID remote) {
+		if (disconnectedSet.find(remote) == disconnectedSet.end()) {
+			disconnectedSet.insert(remote);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 protected:
@@ -44,10 +59,7 @@ protected:
 	virtual bool sendSet();
 	virtual bool send() = 0;
 
-	inline void setDisconnected(HostID remote) {
-		disconnectedSet.insert(remote);
-	}
-	void clearDisconnected();
+	void batchDisconnection();
 
 	void ERROR_EXCEPTION_WINDOW(const WCHAR* wlocation, const WCHAR* wcomment, int errcode = -999999);
 

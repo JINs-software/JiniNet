@@ -8,6 +8,24 @@ JNetServerNetworkCore::JNetServerNetworkCore() {
 }
 
 bool JNetServerNetworkCore::Start(const stServerStartParam param) {
+	//// 논-블로킹 소켓 전환
+	//u_long on = 1;
+	//if (ioctlsocket(sock, FIONBIO, &on) == SOCKET_ERROR) {
+	//	ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"ioctlsocket(..) == SOCKET_ERROR");
+	//}
+	//// SO_REUSEADDR 옵션 적용
+	//int32 optval = 1;
+	//if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval)) == SOCKET_ERROR) {
+	//	ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_REUSEADDR) == SOCKET_ERROR");
+	//}
+
+	int option = TRUE;               //네이글 알고리즘 on/off
+	setsockopt(sock,             //해당 소켓
+		IPPROTO_TCP,          //소켓의 레벨
+		TCP_NODELAY,          //설정 옵션
+		(const char*)&option, // 옵션 포인터
+		sizeof(option));      //옵션 크기
+
 	SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
 	BindSocket(sock, serverAddr);
 	ListenSocket(sock);
@@ -66,14 +84,13 @@ bool JNetServerNetworkCore::receive() {
 		stJNetSession* client = iter.second;
 		if (FD_ISSET(client->sock, &remoteReadSet)) {
 			stJNetSession* client = iter.second;
-			(*client->recvBuff) << iter.first;	// << host id
-			//int* iptr = recvBuff->DirectReserve<int>();
 			int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
 			//*iptr = recvLen;
 			if (recvLen == SOCKET_ERROR) {
 				// TO DO: 에러 처리
 				if (eventHandler->OnClientDisconnect(iter.first)) {
-					setDisconnected(iter.first);
+					// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+					Disconnect(iter.first);
 				}
 			}
 			else {
@@ -95,8 +112,6 @@ bool JNetServerNetworkCore::receive() {
 			}
 		}
 	}
-
-	clearDisconnected();
 
 	return true;
 }
@@ -133,27 +148,34 @@ bool JNetServerNetworkCore::send() {
 				else {
 					sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), dirDeqSize, 0);
 				}
+
 				if (sendLen == SOCKET_ERROR) {
 					// 에러 처리
 					// TO DO: 에러 처리
 					if (eventHandler->OnClientDisconnect(iter.first)) {
-						setDisconnected(iter.first);
+						// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+						Disconnect(iter.first);
 					}
-				}
-				client->sendBuff->DirectMoveDequeueOffset(sendLen);
-
-				len -= sendLen;
-				if (len == 0) {
 					break;
 				}
-				else if (len < 0) {
-					// EXCEPTION
+				else {
+					client->sendBuff->DirectMoveDequeueOffset(sendLen);
+
+					len -= sendLen;
+					if (len == 0) {
+						break;
+					}
+					else if (len > 0) {
+						ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen > sendLen");
+					}
+					else if (len < 0) {
+						// EXCEPTION
+						ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen < sendLen");
+					}
 				}
 			}
 		}
 	}
-
-	clearDisconnected();
 
 	return true;
 }
