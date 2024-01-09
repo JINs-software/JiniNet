@@ -10,7 +10,7 @@ int main() {
 	jpdcomp.SetPacektSizeType("BYTE");
 	jpdcomp.SetOneway();
 	string filePath = ".\\json\\OnewayFightGame.json";
-	string output = "D:\\0. GameSeverStudy\\0. JiniNet\\RPCFightGame\\RPCFightGame\\RPC\\";
+	string output = "D:\\0. GameSeverStudy\\1. Project\\MMO_Figther\\MMO_Figther\\RPC\\";
 	//string output = ".\\json\\";
 
 	jpdcomp.CompileJPD(filePath, output);

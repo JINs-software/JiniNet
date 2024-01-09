@@ -4,8 +4,8 @@
 #include "JNetMsgConfig.h"
 #include "JNetStub.h"
 
-#define SESSION_RECV_BUFF 1000
-#define SESSION_SEND_BUFF 1000
+#define SESSION_RECV_BUFF 10000
+#define SESSION_SEND_BUFF 10000
 
 struct stServerStartParam {
 	std::string IP;
@@ -17,7 +17,9 @@ class JNetServerNetworkCore : public JNetworkCore
 private:
 	JNetServerEventHandler* eventHandler;
 	std::unordered_map<RpcID, JNetStub*> stupMap;
-	fd_set remoteReadSet;
+	//fd_set remoteReadSet;
+	std::vector<fd_set> remoteReadSets;
+	std::vector<fd_set> remoteWriteSets;
 	bool oneway = false;
 
 public:
