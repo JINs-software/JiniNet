@@ -12,7 +12,7 @@ public:
 	JiniPool(uint32 unitSize, uint32 unitCnt) 
 		: _unitSize(unitSize), _unitCnt(unitCnt)
 	{
-		freeListFront = (BYTE*)malloc((unitSize + sizeof(BYTE*))* unitCnt);
+		listFront = freeListFront = (BYTE*)malloc((unitSize + sizeof(BYTE*))* unitCnt);
 		BYTE* memPtr = freeListFront;
 		for (uint32 i = 0; i < unitCnt; i++) {
 			memPtr += unitSize;
@@ -26,6 +26,9 @@ public:
 			}
 			memPtr += sizeof(BYTE*);
 		}
+	}
+	~JiniPool() {
+		free((void*)listFront);
 	}
 
 	// วาด็
@@ -47,6 +50,7 @@ public:
 	}
 
 private:
+	BYTE* listFront;
 	BYTE* freeListFront;
 	//BYTE* freeListEnd;
 

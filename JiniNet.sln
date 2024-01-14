@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JPD_TestConsole", "Project\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JiniNet", "Project\JiniNet\JiniNet.vcxproj", "{C0B25F54-48EA-4A93-9517-3A27A938913E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkCore", "..\..\0. Utility\0. ServerNetwork\NetworkCore\NetworkCore.vcxproj", "{7FB41558-F01C-4978-819D-6FD349BD0F41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Release|x64.Build.0 = Release|x64
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Release|x86.ActiveCfg = Release|Win32
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Release|x86.Build.0 = Release|Win32
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Debug|x64.ActiveCfg = Debug|x64
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Debug|x64.Build.0 = Debug|x64
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Debug|x86.ActiveCfg = Debug|Win32
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Debug|x86.Build.0 = Debug|Win32
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Release|x64.ActiveCfg = Release|x64
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Release|x64.Build.0 = Release|x64
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Release|x86.ActiveCfg = Release|Win32
+		{7FB41558-F01C-4978-819D-6FD349BD0F41}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

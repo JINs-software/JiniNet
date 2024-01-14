@@ -20,11 +20,11 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 			cout << "msg.GetUseSize(): " << msg.GetUseSize() << endl;
 			assert(remote->sendBuff->GetFreeSize() >= msg.GetUseSize());
 		}
-}
+	}
 #endif // REMOTE_MAP
 #ifdef REMOTE_VEC
-	if (netcore->remoteVec[remoteID] != nullptr) {
-		stJNetSession* remote = netcore->remoteVec[remoteID];
+	stJNetSession* remote;
+	if ((remote = netcore->sessionMgr.GetSession(remoteID)) != nullptr) {
 		if (remote->sendBuff->GetFreeSize() >= msg.GetUseSize()) {
 			remote->sendBuff->Enqueue(msg.GetDequeueBufferPtr(), msg.GetUseSize());
 		}
@@ -35,11 +35,16 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 			cout << "msg.GetUseSize(): " << msg.GetUseSize() << endl;
 			assert(remote->sendBuff->GetFreeSize() >= msg.GetUseSize());
 		}
-}
+	}
 #endif // REMOTE_VEC
 }
 
 bool JNetProxy::Disconnect(HostID remoteID)
+{
+	return false;
+}
+
+bool JNetProxy::ForcedDisconnect(HostID remoteID)
 {
 	return netcore->ForcedDisconnect(remoteID);
 }

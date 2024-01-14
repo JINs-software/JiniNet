@@ -3,7 +3,9 @@
 JNetClientNetworkCore::JNetClientNetworkCore() {
 	eventHandler = new JNetClientEventHandler();
 	session = new stJNetSession(sock, CLIENT_RECV_BUFF, CLIENT_SEND_BUFF);
+#ifdef REMOTE_MAP
 	remoteMap.insert({ SERVER_HOST_ID , session });
+#endif // REMOTE_MAP
 }
 
 bool JNetClientNetworkCore::Connect() {

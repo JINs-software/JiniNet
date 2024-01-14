@@ -5,10 +5,6 @@ JNetworkCore::JNetworkCore() {
 	FD_ZERO(&writeSet);
 	InitWindowSocketLib(&wsaData);
 	sock = CreateWindowSocket_IPv4(true);
-
-#ifdef REMOTE_VEC
-	remoteVec.resize(10000, nullptr);
-#endif // REMOTE_VEC
 }
 
 bool JNetworkCore::receiveSet()
@@ -30,20 +26,30 @@ bool JNetworkCore::sendSet() {
 
 void JNetworkCore::batchDisconnection() {
 	for (HostID remote : disconnectedSet) {
+#ifdef REMOTE_MAP
 		if (remoteMap.find(remote) != remoteMap.end()) {
 			delete remoteMap[remote];
 			remoteMap.erase(remote);
 			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
 		}
+#endif // REMOTE_MAP
+#ifdef REMOTE_VEC
+		sessionMgr.DeleteSession(remote);
+#endif // REMOTE_VEC
 	}
 	disconnectedSet.clear();
-	
+
 	for (HostID remote : forcedDisconnectedSet) {
+#ifdef REMOTE_MAP
 		if (remoteMap.find(remote) != remoteMap.end()) {
 			delete remoteMap[remote];
 			remoteMap.erase(remote);
 			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
 		}
+#endif // REMOTE_MAP
+#ifdef REMOTE_VEC
+		sessionMgr.DeleteSession(remote);
+#endif // REMOTE_VEC
 	}
 	forcedDisconnectedSet.clear();
 }

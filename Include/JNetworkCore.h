@@ -3,6 +3,11 @@
 #include "JBuffer.h"
 #include "JNetMsgConfig.h"
 #include "JNetSession.h"
+#include "JNetPool.h"
+
+/*** REMOTE 관리 ***/
+//#define REMOTE_MAP
+#define REMOTE_VEC
 
 /*** 관리 메시지 번호 ***/
 #define JNET_UNIQUE_MSG_NUM 0x88;
@@ -10,14 +15,92 @@
 
 #define SERVER_HOST_ID 0
 
+struct SessionManager {
+	JiniPool* sessionPool;
+	std::vector<stJNetSession*> remoteVec;
+	std::stack<HostID> availableID;
+	stJNetSession* frontSession;
+	//stJNetSession endSession;
+
+	SessionManager() {
+		sessionPool = new JiniPool(sizeof(stJNetSession), HOST_ID_LIMIT);
+		remoteVec.resize(HOST_ID_LIMIT, nullptr);
+		for (uint32 i = HOST_ID_LIMIT - 1; i >= 3; i--) {
+			availableID.push(i);
+		}
+
+		frontSession = nullptr;
+		//endSession.prevSession = nullptr;
+	}
+	~SessionManager() {
+		delete sessionPool;
+	}
+
+	// Get
+	inline stJNetSession* GetSession(HostID hostID) {
+		return remoteVec[hostID];
+	}
+	// Set
+	inline bool SetSession(SOCKET sock, UINT recvBuffSize, UINT sendBuffSize, HostID& hostID) {
+		if (availableID.empty()) {
+			return false;
+		}
+		else {
+			hostID = availableID.top();
+			availableID.pop();
+			remoteVec[hostID] = reinterpret_cast<stJNetSession*>(sessionPool->AllocMem());
+
+			// placement_new
+			new (remoteVec[hostID]) stJNetSession(sock, recvBuffSize, sendBuffSize);
+			remoteVec[hostID]->hostID = hostID;
+			
+			if (frontSession == nullptr) {
+				frontSession = remoteVec[hostID];
+			}
+			else {
+				remoteVec[hostID]->nextSession = frontSession;
+				frontSession->prevSession = remoteVec[hostID];
+				frontSession = remoteVec[hostID];
+			}
+		}
+	}
+	// Delete
+	inline void DeleteSession(HostID hostID) {
+		availableID.push(hostID);
+		if (remoteVec[hostID] == frontSession) {
+			frontSession = nullptr;
+		}
+		else {
+			remoteVec[hostID]->prevSession->nextSession = remoteVec[hostID]->nextSession;
+			if (remoteVec[hostID]->nextSession != nullptr) {
+				remoteVec[hostID]->nextSession->prevSession = remoteVec[hostID]->prevSession;
+			}
+		}
+
+		// 명시적 소멸자 호출
+		remoteVec[hostID]->~stJNetSession();
+		sessionPool->ReturnMem(reinterpret_cast<BYTE*>(remoteVec[hostID]));
+		remoteVec[hostID] = nullptr;
+	}
+
+	// GetSessionFront
+	inline stJNetSession* GetSessionFront() {
+		return frontSession;
+	}
+};
+
 class JNetworkCore
 {
 	friend class JNetProxy;
 private:
 	WSADATA wsaData;
 protected:
+#ifdef REMOTE_MAP
 	std::map<HostID, stJNetSession*> remoteMap;
-	std::vector<stJNetSession*> remoteVec;
+#endif
+#ifdef REMOTE_VEC
+	SessionManager sessionMgr;
+#endif // REMOTE_VEC
 	std::set<HostID> disconnectedSet;
 	std::set<HostID> forcedDisconnectedSet;
 	SOCKET sock;
@@ -48,6 +131,15 @@ public:
 	inline bool Disconnect(HostID remote) {
 		if (disconnectedSet.find(remote) == disconnectedSet.end()) {
 			disconnectedSet.insert(remote);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	inline bool TwoWayDisconnect(HostID remote) {
+		if (forcedDisconnectedSet.find(remote) == forcedDisconnectedSet.end()) {
+			forcedDisconnectedSet.insert(remote);
 			return true;
 		}
 		else {

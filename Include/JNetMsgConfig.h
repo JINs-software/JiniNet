@@ -11,4 +11,6 @@
 typedef unsigned int HostID;
 typedef unsigned short RpcID;
 
+#define HOST_ID_LIMIT 20000
+
 #define ONEWAY_RPCID 0
