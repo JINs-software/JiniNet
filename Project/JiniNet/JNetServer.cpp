@@ -19,3 +19,11 @@ void JNetServer::FrameMove()
 
 	networkCore->Send();
 }
+void JNetServer::FrameMove(uint16 calibration) {
+	networkCore->Receive();
+
+	// Batch Proccessing..
+	batchProcess->BatchProcess(calibration);
+
+	networkCore->Send();
+}

@@ -5,6 +5,10 @@ JNetworkCore::JNetworkCore() {
 	FD_ZERO(&writeSet);
 	InitWindowSocketLib(&wsaData);
 	sock = CreateWindowSocket_IPv4(true);
+
+#ifdef REMOTE_VEC
+	remoteVec.resize(10000, nullptr);
+#endif // REMOTE_VEC
 }
 
 bool JNetworkCore::receiveSet()

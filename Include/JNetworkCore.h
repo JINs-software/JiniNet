@@ -17,6 +17,7 @@ private:
 	WSADATA wsaData;
 protected:
 	std::map<HostID, stJNetSession*> remoteMap;
+	std::vector<stJNetSession*> remoteVec;
 	std::set<HostID> disconnectedSet;
 	std::set<HostID> forcedDisconnectedSet;
 	SOCKET sock;
