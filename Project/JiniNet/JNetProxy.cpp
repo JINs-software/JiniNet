@@ -14,6 +14,9 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 		}
 		else {
 			cout << "netcore 송신 버퍼 크기 부족!" << endl;
+			cout << "remote->sendBuff->GetFreeSize(): " << remote->sendBuff->GetFreeSize() << endl;
+			cout << "remote->sendBuff->GetUseSize(): " << remote->sendBuff->GetUseSize() << endl;
+			cout << "msg.GetUseSize(): " << msg.GetUseSize() << endl;
 			assert(remote->sendBuff->GetFreeSize() >= msg.GetUseSize());
 		}
 	}
@@ -21,5 +24,5 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 
 bool JNetProxy::Disconnect(HostID remoteID)
 {
-	return netcore->Disconnect(remoteID);
+	return netcore->ForcedDisconnect(remoteID);
 }

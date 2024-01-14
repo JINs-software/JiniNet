@@ -25,6 +25,7 @@
     <ClInclude Include="..\..\Include\JNetClientNetworkCore.h" />
     <ClInclude Include="..\..\Include\JNetEventHandler.h" />
     <ClInclude Include="..\..\Include\JNetMsgConfig.h" />
+    <ClInclude Include="..\..\Include\JNetPool.h" />
     <ClInclude Include="..\..\Include\JNetProxy.h" />
     <ClInclude Include="..\..\Include\JNetRPC.h" />
     <ClInclude Include="..\..\Include\JNetServer.h" />

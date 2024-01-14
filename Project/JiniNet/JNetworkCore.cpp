@@ -33,6 +33,15 @@ void JNetworkCore::batchDisconnection() {
 		}
 	}
 	disconnectedSet.clear();
+	
+	for (HostID remote : forcedDisconnectedSet) {
+		if (remoteMap.find(remote) != remoteMap.end()) {
+			delete remoteMap[remote];
+			remoteMap.erase(remote);
+			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
+		}
+	}
+	forcedDisconnectedSet.clear();
 }
 
 void JNetworkCore::ERROR_EXCEPTION_WINDOW(const WCHAR* wlocation, const WCHAR* wcomment, int errcode) {

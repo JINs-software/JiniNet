@@ -28,6 +28,9 @@
     <Filter Include="JiniNet\JNetServer">
       <UniqueIdentifier>{ebd498d8-c3c0-4a7a-8ca0-f654791580bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JiniPool">
+      <UniqueIdentifier>{51e3e256-f491-424d-96fb-9ea2410cdf25}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\JNetClientEventHandler.h">
@@ -71,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\JNetBatchProcess.h">
       <Filter>JiniNet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetPool.h">
+      <Filter>JiniPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

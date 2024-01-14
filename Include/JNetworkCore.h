@@ -18,6 +18,7 @@ private:
 protected:
 	std::map<HostID, stJNetSession*> remoteMap;
 	std::set<HostID> disconnectedSet;
+	std::set<HostID> forcedDisconnectedSet;
 	SOCKET sock;
 protected:
 	fd_set readSet;
@@ -46,6 +47,15 @@ public:
 	inline bool Disconnect(HostID remote) {
 		if (disconnectedSet.find(remote) == disconnectedSet.end()) {
 			disconnectedSet.insert(remote);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	inline bool ForcedDisconnect(HostID remote) {
+		if (forcedDisconnectedSet.find(remote) == forcedDisconnectedSet.end()) {
+			forcedDisconnectedSet.insert(remote);
 			return true;
 		}
 		else {

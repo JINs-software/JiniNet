@@ -1,4 +1,5 @@
 #include "JNetServerNetworkCore.h"
+#include <cassert>
 
 static HostID g_HostID = 3;
 
@@ -21,6 +22,15 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval)) == SOCKET_ERROR) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_REUSEADDR) == SOCKET_ERROR");
 	}
+	// 서버 측에서 강제 종료 요청을 통한 종료이든, 클라이언트 측의 정상/비정상 종료 처리 시작이든 
+	// TCP 강제 종료를 수행
+	// => 링커 1/0 옵션 설정 (TCP 대기 소켓에 적용하여 accept 함수로 리턴되는 소켓은 자동으로 이 옵션으로 설정됨
+	LINGER lingerOptval;
+	lingerOptval.l_onoff = 1;
+	lingerOptval.l_linger = 0;
+	if (setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&lingerOptval, sizeof(lingerOptval)) == SOCKET_ERROR) {
+		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_LINGER) == SOCKET_ERROR");
+	}
 
 	int option = TRUE;               //네이글 알고리즘 on/off
 	setsockopt(sock,             //해당 소켓
@@ -31,7 +41,7 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 
 	SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
 	BindSocket(sock, serverAddr);
-	ListenSocket(sock);
+	ListenSocket(sock, SOMAXCONN);
 	return true;
 }
 
@@ -202,11 +212,15 @@ bool JNetServerNetworkCore::send() {
 					int len = client->sendBuff->GetUseSize();
 					uint32 dirDeqSize = client->sendBuff->GetDirectDequeueSize();
 					int sendLen;
-					if (len <= dirDeqSize) {
+					if (len == dirDeqSize) {
 						sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
 					}
-					else {
+					else if(len > dirDeqSize) {
 						sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), dirDeqSize, 0);
+					}
+					else {
+						cout << "의도되지 않은 흐름: sendBuff->GetUseSize < sendBuff->dirDeqSize" << endl;
+						assert(false);
 					}
 
 					if (sendLen == SOCKET_ERROR) {
@@ -229,9 +243,10 @@ bool JNetServerNetworkCore::send() {
 						if (len == 0) {
 							break;
 						}
-						else if (len > 0) {
-							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen > sendLen");
-						}
+						//else if (len > 0) {
+						//	ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen > sendLen");
+						//}
+						// => len > dirDeqSize라면 가능한 분기 흐름임.
 						else if (len < 0) {
 							// EXCEPTION
 							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen < sendLen");
