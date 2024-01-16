@@ -18,14 +18,17 @@
 struct SessionManager {
 	JiniPool* sessionPool;
 	std::vector<stJNetSession*> remoteVec;
-	std::stack<HostID> availableID;
+	// 코어 - 서버 로직 간 삭제 동기화 이슈 발생(ID 충돌)
+	//std::stack<HostID> availableID;
+	std::queue<HostID> availableID;
 	stJNetSession* frontSession;
 	//stJNetSession endSession;
 
 	SessionManager() {
 		sessionPool = new JiniPool(sizeof(stJNetSession), HOST_ID_LIMIT);
 		remoteVec.resize(HOST_ID_LIMIT, nullptr);
-		for (uint32 i = HOST_ID_LIMIT - 1; i >= 3; i--) {
+		//for (uint32 i = HOST_ID_LIMIT - 1; i >= 3; i--) {
+		for(uint32 i = 3; i < HOST_ID_LIMIT; i++) {
 			availableID.push(i);
 		}
 
@@ -46,7 +49,7 @@ struct SessionManager {
 			return false;
 		}
 		else {
-			hostID = availableID.top();
+			hostID = availableID.front(); //availableID.top();
 			availableID.pop();
 			remoteVec[hostID] = reinterpret_cast<stJNetSession*>(sessionPool->AllocMem());
 

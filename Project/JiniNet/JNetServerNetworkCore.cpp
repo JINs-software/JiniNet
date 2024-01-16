@@ -192,6 +192,7 @@ bool JNetServerNetworkCore::receive() {
 		}
 		/////////////////////////////////////////////////
 		/////////////////////////////////////////////////
+
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			const stJNetSession* client = nullptr;
 			HostID hID = 0;
@@ -216,41 +217,48 @@ bool JNetServerNetworkCore::receive() {
 			}
 #endif // REMOTE_VEC
 			if (FD_ISSET(client->sock, &remoteReadSets[sidx])) {
-				int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
-				//*iptr = recvLen;
-				if (recvLen == SOCKET_ERROR) {
-					// TO DO: 에러 처리
-					// select 모델이기에 WSAEWOULDBLOCK 에러가 발생하지 않음을 기대한다. 
-					// 방어코드 
-					if (WSAGetLastError() != WSAEWOULDBLOCK) {
+				while (true) {
+					// 다이렉트로 받을 수 있는 만큼 씩 받는다. 만약 TCP 수신 버퍼에 데이터가 남아있는데, 다이렉트 용량이 부족하다면 while(true)루프로 받을 수 있다.
+					int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
+					//*iptr = recvLen;
+					if (recvLen == SOCKET_ERROR) {
+						// TO DO: 에러 처리
+						// select 모델이기에 WSAEWOULDBLOCK 에러가 발생하지 않음을 기대한다. 
+						// 방어코드 
+						int errCode = WSAGetLastError();
+						if (errCode != WSAEWOULDBLOCK) {
+							std::cout << "[JNet::RECV] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
+							if (eventHandler->OnClientDisconnect(hID)) {
+								// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+								Disconnect(hID);
+							}
+						}
+						break;
+					}
+					else if (recvLen == 0) {
+						// 상대측에서 정상 연결 종료 요청 (FIN)
 						if (eventHandler->OnClientDisconnect(hID)) {
 							// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
 							Disconnect(hID);
 						}
-					}
-				}
-				else if (recvLen == 0) {
-					// 상대측에서 정상 연결 종료 요청 (FIN)
-					if (eventHandler->OnClientDisconnect(hID)) {
-						// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
-						Disconnect(hID);
-					}
-				}
-				else {
-					client->recvBuff->DirectMoveEnqueueOffset(recvLen);
-
-					if (!oneway) {
-						stJMSG_HDR hdr;
-						client->recvBuff->Peek(&hdr);
-						if (stupMap.find(hdr.msgID) != stupMap.end()) {
-							stupMap[hdr.msgID]->ProcessReceivedMessage(hID, *client->recvBuff);
-						}
-						else {
-							ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
-						}
+						break;
 					}
 					else {
-						stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(hID, *client->recvBuff);
+						client->recvBuff->DirectMoveEnqueueOffset(recvLen);
+
+						if (!oneway) {
+							stJMSG_HDR hdr;
+							client->recvBuff->Peek(&hdr);
+							if (stupMap.find(hdr.msgID) != stupMap.end()) {
+								stupMap[hdr.msgID]->ProcessReceivedMessage(hID, *client->recvBuff);
+							}
+							else {
+								ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
+							}
+						}
+						else {
+							stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(hID, *client->recvBuff);
+						}
 					}
 				}
 			}
@@ -375,7 +383,9 @@ bool JNetServerNetworkCore::send() {
 						// TO DO: 에러 처리
 						// select 모델이기에 WSAEWOULDBLOCK 에러가 발생하지 않음을 기대한다. 
 						// 방어코드 
-						if (WSAGetLastError() != WSAEWOULDBLOCK) {
+						int errCode = WSAGetLastError();
+						if (errCode != WSAEWOULDBLOCK) {
+							std::cout << "[JNet::SEND] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
 							if (eventHandler->OnClientDisconnect(hID)) {
 								// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
 								Disconnect(hID);
