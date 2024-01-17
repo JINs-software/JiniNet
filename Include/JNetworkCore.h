@@ -5,6 +5,10 @@
 #include "JNetSession.h"
 #include "JNetPool.h"
 
+// 페이지 폴트 확인
+#include <Psapi.h>
+#pragma comment(lib, "psapi")
+
 /*** REMOTE 관리 ***/
 //#define REMOTE_MAP
 #define REMOTE_VEC
@@ -126,8 +130,21 @@ public:
 		if (!sendSet()) {
 			return false;
 		}
-		//return send();
+		HANDLE procHandle = GetCurrentProcess();
+		PROCESS_MEMORY_COUNTERS pmcBefore;
+		PROCESS_MEMORY_COUNTERS pmcAfter;
+		if (!GetProcessMemoryInfo(procHandle, &pmcBefore, sizeof(pmcBefore))) {
+			std::cout << "GetProcessMemoryInfo ERROR" << std::endl;
+			return false;
+		}
 		bool ret = send();
+		if (!GetProcessMemoryInfo(procHandle, &pmcAfter, sizeof(pmcAfter))) {
+			std::cout << "GetProcessMemoryInfo ERROR" << std::endl;
+			return false;
+		}
+		std::cout << pmcBefore.PageFaultCount << std::endl;
+		std::cout << pmcAfter.PageFaultCount << std::endl;
+		std::cout << "page fault: " << pmcAfter.PageFaultCount - pmcBefore.PageFaultCount << std::endl;
 		batchDisconnection();
 		return ret;
 	}

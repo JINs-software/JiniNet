@@ -44,7 +44,7 @@ public:
 		networkCore->Start(param);
 	}
 	void FrameMove();
-	void FrameMove(uint16 calibration);
+	void FrameMove(uint16 loopDelta);
 
 private:
 

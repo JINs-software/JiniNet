@@ -19,11 +19,11 @@ void JNetServer::FrameMove()
 
 	networkCore->Send();
 }
-void JNetServer::FrameMove(uint16 calibration) {
+void JNetServer::FrameMove(uint16 loopDelta) {
 	networkCore->Receive();
 
 	// Batch Proccessing..
-	batchProcess->BatchProcess(calibration);
+	batchProcess->BatchProcess(loopDelta);
 
 	networkCore->Send();
 }

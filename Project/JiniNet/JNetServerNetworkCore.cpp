@@ -66,7 +66,10 @@ bool JNetServerNetworkCore::receiveSet() {
 		if (remoteReadSets.size() <= sidx) {
 			remoteReadSets.push_back(fd_set());
 		}
-		FD_ZERO(&remoteReadSets[sidx]);
+
+		fd_set& remoteReadSet = remoteReadSets[sidx];
+
+		FD_ZERO(&remoteReadSet);
 		bool setFlag = false;
 
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
@@ -90,7 +93,7 @@ bool JNetServerNetworkCore::receiveSet() {
 			}
 #endif // REMOTE_VEC
 
-			FD_SET(client->sock, &remoteReadSets[sidx]);
+			FD_SET(client->sock, &remoteReadSet);
 			setFlag = true;
 
 #ifdef REMOTE_MAP
@@ -102,7 +105,7 @@ bool JNetServerNetworkCore::receiveSet() {
 		}
 		if (setFlag) {
 			timeval tval = { 0, 0 };
-			int retSel = select(0, &remoteReadSets[sidx], nullptr, nullptr, &tval);
+			int retSel = select(0, &remoteReadSet, nullptr, nullptr, &tval);
 			if (retSel == SOCKET_ERROR) {
 				ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::ReceiveSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
 				return false;
@@ -216,7 +219,8 @@ bool JNetServerNetworkCore::receive() {
 				hID = session->hostID;
 			}
 #endif // REMOTE_VEC
-			if (FD_ISSET(client->sock, &remoteReadSets[sidx])) {
+			fd_set& remoteReadSet = remoteReadSets[sidx];
+			if (FD_ISSET(client->sock, &remoteReadSet)) {
 				while (true) {
 					// 다이렉트로 받을 수 있는 만큼 씩 받는다. 만약 TCP 수신 버퍼에 데이터가 남아있는데, 다이렉트 용량이 부족하다면 while(true)루프로 받을 수 있다.
 					int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
@@ -286,7 +290,8 @@ bool JNetServerNetworkCore::sendSet() {
 		if (remoteWriteSets.size() <= sidx) {
 			remoteWriteSets.push_back(fd_set());
 		}
-		FD_ZERO(&remoteWriteSets[sidx]);
+		fd_set& remoteWriteSet = remoteWriteSets[sidx];
+		FD_ZERO(&remoteWriteSet);
 		bool setFlag = false;
 
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
@@ -309,7 +314,7 @@ bool JNetServerNetworkCore::sendSet() {
 				client = session;
 			}
 #endif // REMOTE_VEC
-			FD_SET(client->sock, &remoteWriteSets[sidx]);
+			FD_SET(client->sock, &remoteWriteSet);
 			setFlag = true;
 #ifdef REMOTE_MAP
 			iter++;
@@ -320,7 +325,7 @@ bool JNetServerNetworkCore::sendSet() {
 		}
 		if (setFlag) {
 			timeval tval = { 0, 0 };
-			int retSel = select(0, nullptr, &remoteWriteSets[sidx], nullptr, &tval);
+			int retSel = select(0, nullptr, &remoteWriteSet, nullptr, &tval);
 			if (retSel == SOCKET_ERROR) {
 				ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::sendSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
 				return false;
@@ -362,7 +367,8 @@ bool JNetServerNetworkCore::send() {
 				hID = session->hostID;
 			}
 #endif // REMOTE_VEC
-			if (FD_ISSET(client->sock, &remoteWriteSets[sidx])) {
+			fd_set& remoteWriteSet = remoteWriteSets[sidx];
+			if (FD_ISSET(client->sock, &remoteWriteSet)) {
 				while (client->sendBuff->GetUseSize() > 0) {
 					int len = client->sendBuff->GetUseSize();
 					uint32 dirDeqSize = client->sendBuff->GetDirectDequeueSize();
