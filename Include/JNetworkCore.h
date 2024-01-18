@@ -8,10 +8,14 @@
 // 페이지 폴트 확인
 #include <Psapi.h>
 #pragma comment(lib, "psapi")
+//#define CHECK_PAGE_FAULT
 
 /*** REMOTE 관리 ***/
 //#define REMOTE_MAP
 #define REMOTE_VEC
+
+/*** 프록시의 다이렉트 세션 접근 ***/
+#define DIRECT_ACCESS_TO_JNETSESSION
 
 /*** 관리 메시지 번호 ***/
 #define JNET_UNIQUE_MSG_NUM 0x88;
@@ -130,6 +134,7 @@ public:
 		if (!sendSet()) {
 			return false;
 		}
+#ifdef CHECK_PAGE_FAULT
 		HANDLE procHandle = GetCurrentProcess();
 		PROCESS_MEMORY_COUNTERS pmcBefore;
 		PROCESS_MEMORY_COUNTERS pmcAfter;
@@ -137,7 +142,9 @@ public:
 			std::cout << "GetProcessMemoryInfo ERROR" << std::endl;
 			return false;
 		}
+#endif // CHECK_PAGE_FAULT
 		bool ret = send();
+#ifdef CHECK_PAGE_FAULT
 		if (!GetProcessMemoryInfo(procHandle, &pmcAfter, sizeof(pmcAfter))) {
 			std::cout << "GetProcessMemoryInfo ERROR" << std::endl;
 			return false;
@@ -145,6 +152,7 @@ public:
 		std::cout << pmcBefore.PageFaultCount << std::endl;
 		std::cout << pmcAfter.PageFaultCount << std::endl;
 		std::cout << "page fault: " << pmcAfter.PageFaultCount - pmcBefore.PageFaultCount << std::endl;
+#endif // CHECK_PAGE_FAULT
 		batchDisconnection();
 		return ret;
 	}
