@@ -231,10 +231,14 @@ bool JNetServerNetworkCore::receive() {
 						// 방어코드 
 						int errCode = WSAGetLastError();
 						if (errCode != WSAEWOULDBLOCK) {
-							std::cout << "[JNet::RECV] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
-							if (eventHandler->OnClientDisconnect(hID)) {
-								// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
-								Disconnect(hID);
+							//std::cout << "[JNet::RECV] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
+							//if (eventHandler->OnClientDisconnect(hID)) {
+							//	// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+							//	Disconnect(hID);
+							//}
+							//=> 이미 삭제 요청된 클라이언트에 중복으로 에러가 뜰 수 있음
+							if (Disconnect(hID)) {
+								eventHandler->OnClientDisconnect(hID);
 							}
 						}
 						break;
@@ -391,15 +395,22 @@ bool JNetServerNetworkCore::send() {
 						// 방어코드 
 						int errCode = WSAGetLastError();
 						if (errCode != WSAEWOULDBLOCK) {
-							std::cout << "[JNet::SEND] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
-							if (eventHandler->OnClientDisconnect(hID)) {
-								// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
-								Disconnect(hID);
+							//std::cout << "[JNet::SEND] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
+							//if (eventHandler->OnClientDisconnect(hID)) {
+							//	// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+							//	Disconnect(hID);
+							//}
+							if (Disconnect(hID)) {
+								eventHandler->OnClientDisconnect(hID);
 							}
 						}
 						break;
 					}
 					else {
+						if (sendLen < len) {
+							std::cout << "[SEND] sendLen < len : TCP 송신 버퍼 공간 부족" << std::endl;
+						}
+
 						client->sendBuff->DirectMoveDequeueOffset(sendLen);
 
 						len -= sendLen;
