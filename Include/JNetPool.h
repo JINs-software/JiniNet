@@ -6,15 +6,40 @@ typedef unsigned char BYTE;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+//class JiniHeap {
+//public:
+//	void CreateHeap() {
+//		HeapCreate(HEAP_NO_SERIALIZE, )
+//	}
+//};
+
 class JiniPool {
 public:
 	JiniPool() {};
-	JiniPool(uint32 unitSize, uint32 unitCnt) 
+	//JiniPool(uint32 unitSize, uint32 unitCnt) 
+	//	: _unitSize(unitSize), _unitCnt(unitCnt)
+	//{
+	//	listFront = freeListFront = (BYTE*)malloc((unitSize + sizeof(BYTE*))* unitCnt);
+	//	BYTE* memPtr = freeListFront;
+	//	for (uint32 i = 0; i < unitCnt; i++) {
+	//		memPtr += unitSize;
+	//		if (memPtr != NULL) {
+	//			if (i != unitCnt - 1) {
+	//				*(reinterpret_cast<uint64*>(memPtr)) = reinterpret_cast<uint64>(memPtr + sizeof(BYTE*));
+	//			}
+	//			else {
+	//				*(reinterpret_cast<uint64*>(memPtr)) = NULL;
+	//			}
+	//		}
+	//		memPtr += sizeof(BYTE*);
+	//	}
+	//}
+	JiniPool(size_t unitSize, size_t unitCnt)
 		: _unitSize(unitSize), _unitCnt(unitCnt)
 	{
-		listFront = freeListFront = (BYTE*)malloc((unitSize + sizeof(BYTE*))* unitCnt);
+		listFront = freeListFront = (BYTE*)malloc((unitSize + sizeof(BYTE*)) * unitCnt);
 		BYTE* memPtr = freeListFront;
-		for (uint32 i = 0; i < unitCnt; i++) {
+		for (size_t i = 0; i < unitCnt; i++) {
 			memPtr += unitSize;
 			if (memPtr != NULL) {
 				if (i != unitCnt - 1) {
@@ -54,6 +79,6 @@ private:
 	BYTE* freeListFront;
 	//BYTE* freeListEnd;
 
-	uint32 _unitSize;
-	uint32 _unitCnt;
+	size_t _unitSize;
+	size_t _unitCnt;
 };
