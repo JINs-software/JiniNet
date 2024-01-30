@@ -78,6 +78,9 @@
     <ClInclude Include="..\..\Include\JNetPool.h">
       <Filter>JiniPool</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\JMemoryHistory.h">
+      <Filter>JiniPool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JNetProxy.cpp">
@@ -109,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="JNetClientNetworkCore.cpp">
       <Filter>JNetworkCore</Filter>
+    </ClCompile>
+    <ClCompile Include="JMemoryHistory.cpp">
+      <Filter>JiniPool</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

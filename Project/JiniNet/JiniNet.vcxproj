@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Include\JMemoryHistory.h" />
     <ClInclude Include="..\..\Include\JNetBatchProcess.h" />
     <ClInclude Include="..\..\Include\JNetClient.h" />
     <ClInclude Include="..\..\Include\JNetClientEventHandler.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="Proxy.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="JMemoryHistory.cpp" />
     <ClCompile Include="JNetClient.cpp" />
     <ClCompile Include="JNetClientEventHandler.cpp" />
     <ClCompile Include="JNetClientNetworkCore.cpp" />
