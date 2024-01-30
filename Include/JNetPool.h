@@ -1,6 +1,7 @@
 #pragma once
 #include <stdlib.h>
 //#include "Types.h"
+#include <mutex>
 
 typedef unsigned char BYTE;
 typedef uint32_t uint32;
@@ -58,18 +59,23 @@ public:
 
 	// 할당
 	BYTE* AllocMem() {
+		std::lock_guard<std::mutex> lock(_mutex);
+		BYTE* retPtr = NULL;
 		// 조건 체크 ..
-		if (freeListFront == NULL) {
-			return NULL;
-		}
-		else {
-			BYTE* retPtr = freeListFront;
+		//if (freeListFront == NULL) {
+		//	return NULL;
+		//}
+		//else {
+		if(freeListFront != NULL) {
+			retPtr = freeListFront;
 			freeListFront = reinterpret_cast<BYTE*>(*reinterpret_cast<uint64*>(freeListFront + _unitSize));
-			return retPtr;
+			//return retPtr;
 		}
+		return retPtr;
 	}
 	// 반환
 	void ReturnMem(BYTE* ptr) {
+		std::lock_guard<std::mutex> lock(_mutex);
 		*reinterpret_cast<uint64*>(ptr + _unitSize) = reinterpret_cast<uint64>(freeListFront);
 		freeListFront = ptr;
 	}
@@ -81,4 +87,6 @@ private:
 
 	size_t _unitSize;
 	size_t _unitCnt;
+
+	std::mutex _mutex;
 };

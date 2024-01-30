@@ -32,12 +32,12 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_LINGER) == SOCKET_ERROR");
 	}
 
-	int option = TRUE;               //네이글 알고리즘 on/off
-	setsockopt(sock,             //해당 소켓
-		IPPROTO_TCP,          //소켓의 레벨
-		TCP_NODELAY,          //설정 옵션
-		(const char*)&option, // 옵션 포인터
-		sizeof(option));      //옵션 크기
+	//int option = TRUE;               //네이글 알고리즘 on/off
+	//setsockopt(sock,             //해당 소켓
+	//	IPPROTO_TCP,          //소켓의 레벨
+	//	TCP_NODELAY,          //설정 옵션
+	//	(const char*)&option, // 옵션 포인터
+	//	sizeof(option));      //옵션 크기
 
 	SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
 	BindSocket(sock, serverAddr);
@@ -409,6 +409,7 @@ bool JNetServerNetworkCore::send() {
 					else {
 						if (sendLen < len) {
 							std::cout << "[SEND] sendLen < len : TCP 송신 버퍼 공간 부족" << std::endl;
+							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send", L"sendLen < len : TCP 송신 버퍼 공간 부족");
 						}
 
 						client->sendBuff->DirectMoveDequeueOffset(sendLen);
