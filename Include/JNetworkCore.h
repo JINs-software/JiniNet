@@ -79,7 +79,8 @@ struct SessionManager {
 	inline void DeleteSession(HostID hostID) {
 		availableID.push(hostID);
 		if (remoteVec[hostID] == frontSession) {
-			frontSession = nullptr;
+			//frontSession = nullptr;
+			frontSession = frontSession->nextSession;
 		}
 		else {
 			remoteVec[hostID]->prevSession->nextSession = remoteVec[hostID]->nextSession;

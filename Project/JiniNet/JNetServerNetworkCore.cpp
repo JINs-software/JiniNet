@@ -51,13 +51,15 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 }
 
 bool JNetServerNetworkCore::receiveSet() {
+	// 리슨 소켓 등록은 receive 함수에서 클라이언트 select 루프에서 진행한다.
+	// 더 빈번하게 연결 요청을 확인하기 위해서이다.
 	//JNetworkCore::receiveSet();
 
 	/* 클라이언트 통신 소켓 64 초과 로직 추가 */
-#ifdef REMOTE_MAP
+//#ifdef REMOTE_MAP
+#if defined(REMOTE_MAP)
 	auto iter = remoteMap.begin();
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
+#elif defined(REMOTE_VEC)
 	stJNetSession* session = sessionMgr.GetSessionFront();
 #endif // REMOTE_VEC
 
@@ -66,9 +68,7 @@ bool JNetServerNetworkCore::receiveSet() {
 		if (remoteReadSets.size() <= sidx) {
 			remoteReadSets.push_back(fd_set());
 		}
-
 		fd_set& remoteReadSet = remoteReadSets[sidx];
-
 		FD_ZERO(&remoteReadSet);
 		bool setFlag = false;
 
@@ -92,10 +92,8 @@ bool JNetServerNetworkCore::receiveSet() {
 				client = session;
 			}
 #endif // REMOTE_VEC
-
 			FD_SET(client->sock, &remoteReadSet);
 			setFlag = true;
-
 #ifdef REMOTE_MAP
 			iter++;
 #endif // REMOTE_MAP
@@ -159,8 +157,9 @@ bool JNetServerNetworkCore::receive() {
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
 		/////////////////////////////////////////////////
-		//////////// Listen Socket 확인 ////////////////
+		// Listen Socket 확인 
 		// 리슨 소켓 확인 작업을 더 빈번하게 하도록 함
+		/////////////////////////////////////////////////
 		JNetworkCore::receiveSet();
 		if (FD_ISSET(sock, &readSet)) {
 			if (eventHandler->OnConnectRequest()) {
@@ -193,9 +192,10 @@ bool JNetServerNetworkCore::receive() {
 				}
 			}
 		}
-		/////////////////////////////////////////////////
-		/////////////////////////////////////////////////
 
+		//////////////////////////////////////////////////////////////////
+		// 64개 이하의 클라이언트 세션 소켓 확인 
+		//////////////////////////////////////////////////////////////////
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			const stJNetSession* client = nullptr;
 			HostID hID = 0;
@@ -220,15 +220,19 @@ bool JNetServerNetworkCore::receive() {
 			}
 #endif // REMOTE_VEC
 			fd_set& remoteReadSet = remoteReadSets[sidx];
-			if (FD_ISSET(client->sock, &remoteReadSet)) {
+			if (FD_ISSET(client->sock, &remoteReadSet)) {	// client->sock은 논-블로킹 모드의 소켓
 				while (true) {
 					// 다이렉트로 받을 수 있는 만큼 씩 받는다. 만약 TCP 수신 버퍼에 데이터가 남아있는데, 다이렉트 용량이 부족하다면 while(true)루프로 받을 수 있다.
+					// 그러나 'JBUFF_DIRPTR_MANUAL_RESET'를 정의하지 않으면 JBuffer는 인큐, 디큐 포인터가 같아질 때 다시 각 포인터를 다시 메모리 버퍼 시작점으로 이동시킨다.
+					// 이에 다이렉트 용량이 부족해지는 경우가 드물것으로 예상된다.
 					int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
-					//*iptr = recvLen;
+
 					if (recvLen == SOCKET_ERROR) {
 						// TO DO: 에러 처리
-						// select 모델이기에 WSAEWOULDBLOCK 에러가 발생하지 않음을 기대한다. 
-						// 방어코드 
+						// 본래 select 모델이기에 WSAEWOULDBLOCK 에러가 발생하지 않음을 기대한다. 
+						// 하지만 FD_ISSET에서 TRUE가 반환되고, 수신 작업을 할 때, 다이렉트 디큐 사이즈로 받기에 받을 수 있는 데이터보다 더 적게 받을 수 있는 가능성이 있다. 
+						// 따라서 while 루프를 돌아 추가적인 수신을 시도한다. 이러한 경우 WSAWOULDBLOCK 에러가 발생할 수 있음을 고려해야 한다. 
+
 						int errCode = WSAGetLastError();
 						if (errCode != WSAEWOULDBLOCK) {
 							//std::cout << "[JNet::RECV] HostID: " << hID << "WSAGetLastError: " << errCode << std::endl;
@@ -237,17 +241,28 @@ bool JNetServerNetworkCore::receive() {
 							//	Disconnect(hID);
 							//}
 							//=> 이미 삭제 요청된 클라이언트에 중복으로 에러가 뜰 수 있음
+
+							// (1) 세션 삭제는 1차적으로 이벤트 핸들러를 거쳐 컨텐츠 단에서 삭제하도록 요청
+							//     콘텐츠의 DeleteFighter 함수 호출
+							// (2) 추후 일괄적으로 네트워크 코어 측에서 관리하는 삭제 세션 셋 일괄 삭제
 							if (Disconnect(hID)) {
 								eventHandler->OnClientDisconnect(hID);
 							}
 						}
-						break;
+						
+						break;	
 					}
 					else if (recvLen == 0) {
 						// 상대측에서 정상 연결 종료 요청 (FIN)
-						if (eventHandler->OnClientDisconnect(hID)) {
-							// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
-							Disconnect(hID);
+
+						//if (eventHandler->OnClientDisconnect(hID)) {
+						//	// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
+						//	Disconnect(hID);
+						//}
+
+						// 위 에러 분기와 마찬가지로 중복 삭제를 막기 위해 순서를 변경
+						if (Disconnect(hID)) {
+							eventHandler->OnClientDisconnect(hID);
 						}
 						break;
 					}
@@ -377,16 +392,24 @@ bool JNetServerNetworkCore::send() {
 					int len = client->sendBuff->GetUseSize();
 					uint32 dirDeqSize = client->sendBuff->GetDirectDequeueSize();
 					int sendLen;
-					if (len == dirDeqSize) {
-						sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
+					//if (len == dirDeqSize) {
+					//	sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
+					//}
+					//else if(len > dirDeqSize) {
+					//	sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), dirDeqSize, 0);
+					//}
+					//else {
+					//	cout << "의도되지 않은 흐름: sendBuff->GetUseSize < sendBuff->dirDeqSize" << endl;
+					//	assert(false);
+					//}
+
+					// 의도되지 않은 흐름
+					assert(len >= dirDeqSize);
+
+					if (len > dirDeqSize) {
+						len = dirDeqSize;
 					}
-					else if(len > dirDeqSize) {
-						sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), dirDeqSize, 0);
-					}
-					else {
-						cout << "의도되지 않은 흐름: sendBuff->GetUseSize < sendBuff->dirDeqSize" << endl;
-						assert(false);
-					}
+					sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
 
 					if (sendLen == SOCKET_ERROR) {
 						// 에러 처리
@@ -407,24 +430,34 @@ bool JNetServerNetworkCore::send() {
 						break;
 					}
 					else {
+						bool skipFlag = false;
+
 						if (sendLen < len) {
+							//Q.select 모델(+논 - 블로킹 소켓)에서 send 시 요청 length보다 적게 보낸다면 문제는 두 가지인가 ?
+							//	(1) 송신측 송신 버퍼 부족
+							//	(2) 수신측 수신 버퍼 부족
+							//
+							//	만약 이 상황이 발생하면 어떻게 대처할 것인가 ?
+							//	(1) 그냥 끊는다.
+							//	(2) 조금더 기다린다(?)
+
 							std::cout << "[SEND] sendLen < len : TCP 송신 버퍼 공간 부족" << std::endl;
-							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send", L"sendLen < len : TCP 송신 버퍼 공간 부족");
+							// 또는 상대측 수신 버퍼 공간 부족??
+							std::cout << "[SEND] sendLen < len : 상대측 TCP 수신 버퍼 공간 부족??" << std::endl;
+							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send", L"sendLen < len");
+
+							// 일단 연결을 끊지 않고 송신 루프의 다음 턴으로 넘김
+							//if (Disconnect(hID)) {
+							//	eventHandler->OnClientDisconnect(hID);
+							//}
+
+							//break;
+							skipFlag = true;
 						}
 
 						client->sendBuff->DirectMoveDequeueOffset(sendLen);
-
-						len -= sendLen;
-						if (len == 0) {
+						if (skipFlag) {
 							break;
-						}
-						//else if (len > 0) {
-						//	ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen > sendLen");
-						//}
-						// => len > dirDeqSize라면 가능한 분기 흐름임.
-						else if (len < 0) {
-							// EXCEPTION
-							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send ", L"sendBufferLen < sendLen");
 						}
 					}
 				}
