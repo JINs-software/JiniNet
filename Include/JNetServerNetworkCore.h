@@ -1,11 +1,7 @@
 #pragma once
 #include "JNetworkCore.h"
 #include "JNetServerEventHandler.h"
-#include "JNetMsgConfig.h"
 #include "JNetStub.h"
-
-#define SESSION_RECV_BUFF 100000
-#define SESSION_SEND_BUFF 100000
 
 struct stServerStartParam {
 	std::string IP;

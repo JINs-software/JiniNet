@@ -42,9 +42,6 @@
     <ClInclude Include="..\..\Include\JNetServer.h">
       <Filter>JiniNet\JNetServer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\JNetClientNetworkCore.h">
-      <Filter>JNetworkCore</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\JNetServerNetworkCore.h">
       <Filter>JNetworkCore</Filter>
     </ClInclude>
@@ -81,6 +78,12 @@
     <ClInclude Include="..\..\Include\JMemoryHistory.h">
       <Filter>JiniPool</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\JNetSessionConfig.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetServerEventHandler.h">
+      <Filter>JNetEventHandler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="JNetProxy.cpp">
@@ -108,9 +111,6 @@
       <Filter>JNetworkCore</Filter>
     </ClCompile>
     <ClCompile Include="JNetServerNetworkCore.cpp">
-      <Filter>JNetworkCore</Filter>
-    </ClCompile>
-    <ClCompile Include="JNetClientNetworkCore.cpp">
       <Filter>JNetworkCore</Filter>
     </ClCompile>
     <ClCompile Include="JMemoryHistory.cpp">

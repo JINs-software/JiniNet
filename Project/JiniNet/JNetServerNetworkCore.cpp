@@ -197,7 +197,7 @@ bool JNetServerNetworkCore::receive() {
 		// 64개 이하의 클라이언트 세션 소켓 확인 
 		//////////////////////////////////////////////////////////////////
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
-			const stJNetSession* client = nullptr;
+			stJNetSession* client = nullptr;
 			HostID hID = 0;
 #ifdef REMOTE_MAP
 			if (iter == remoteMap.end()) {
@@ -225,7 +225,7 @@ bool JNetServerNetworkCore::receive() {
 					// 다이렉트로 받을 수 있는 만큼 씩 받는다. 만약 TCP 수신 버퍼에 데이터가 남아있는데, 다이렉트 용량이 부족하다면 while(true)루프로 받을 수 있다.
 					// 그러나 'JBUFF_DIRPTR_MANUAL_RESET'를 정의하지 않으면 JBuffer는 인큐, 디큐 포인터가 같아질 때 다시 각 포인터를 다시 메모리 버퍼 시작점으로 이동시킨다.
 					// 이에 다이렉트 용량이 부족해지는 경우가 드물것으로 예상된다.
-					int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff->GetEnqueueBufferPtr()), client->recvBuff->GetDirectEnqueueSize(), 0);
+					int recvLen = recv(client->sock, reinterpret_cast<char*>(client->recvBuff.GetEnqueueBufferPtr()), client->recvBuff.GetDirectEnqueueSize(), 0);
 
 					if (recvLen == SOCKET_ERROR) {
 						// TO DO: 에러 처리
@@ -246,6 +246,7 @@ bool JNetServerNetworkCore::receive() {
 							//     콘텐츠의 DeleteFighter 함수 호출
 							// (2) 추후 일괄적으로 네트워크 코어 측에서 관리하는 삭제 세션 셋 일괄 삭제
 							if (Disconnect(hID)) {
+								cout << "recv() return SOCKET_ERROR(" << errCode << ") | hostID: " << hID << endl;
 								eventHandler->OnClientDisconnect(hID);
 							}
 						}
@@ -262,25 +263,26 @@ bool JNetServerNetworkCore::receive() {
 
 						// 위 에러 분기와 마찬가지로 중복 삭제를 막기 위해 순서를 변경
 						if (Disconnect(hID)) {
+							cout << "recv() return 0, TCP 정상 종료 | hostID: " << hID << endl;
 							eventHandler->OnClientDisconnect(hID);
 						}
 						break;
 					}
 					else {
-						client->recvBuff->DirectMoveEnqueueOffset(recvLen);
+						client->recvBuff.DirectMoveEnqueueOffset(recvLen);
 
 						if (!oneway) {
 							stJMSG_HDR hdr;
-							client->recvBuff->Peek(&hdr);
+							client->recvBuff.Peek(&hdr);
 							if (stupMap.find(hdr.msgID) != stupMap.end()) {
-								stupMap[hdr.msgID]->ProcessReceivedMessage(hID, *client->recvBuff);
+								stupMap[hdr.msgID]->ProcessReceivedMessage(hID, client->recvBuff);
 							}
 							else {
 								ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
 							}
 						}
 						else {
-							stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(hID, *client->recvBuff);
+							stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(hID, client->recvBuff);
 						}
 					}
 				}
@@ -364,7 +366,7 @@ bool JNetServerNetworkCore::send() {
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
-			const stJNetSession* client = nullptr;
+			stJNetSession* client = nullptr;
 			HostID hID = 0;
 #ifdef REMOTE_MAP
 			if (iter == remoteMap.end()) {
@@ -388,9 +390,9 @@ bool JNetServerNetworkCore::send() {
 #endif // REMOTE_VEC
 			fd_set& remoteWriteSet = remoteWriteSets[sidx];
 			if (FD_ISSET(client->sock, &remoteWriteSet)) {
-				while (client->sendBuff->GetUseSize() > 0) {
-					int len = client->sendBuff->GetUseSize();
-					uint32 dirDeqSize = client->sendBuff->GetDirectDequeueSize();
+				while (client->sendBuff.GetUseSize() > 0) {
+					int len = client->sendBuff.GetUseSize();
+					uint32 dirDeqSize = client->sendBuff.GetDirectDequeueSize();
 					int sendLen;
 					//if (len == dirDeqSize) {
 					//	sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
@@ -409,7 +411,7 @@ bool JNetServerNetworkCore::send() {
 					if (len > dirDeqSize) {
 						len = dirDeqSize;
 					}
-					sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff->GetDequeueBufferPtr()), len, 0);
+					sendLen = ::send(client->sock, reinterpret_cast<const char*>(client->sendBuff.GetDequeueBufferPtr()), len, 0);
 
 					if (sendLen == SOCKET_ERROR) {
 						// 에러 처리
@@ -424,6 +426,7 @@ bool JNetServerNetworkCore::send() {
 							//	Disconnect(hID);
 							//}
 							if (Disconnect(hID)) {
+								cout << "send() return SOCKET_ERROR( " << errCode << ") | hostID: " << hID << endl;
 								eventHandler->OnClientDisconnect(hID);
 							}
 						}
@@ -455,7 +458,7 @@ bool JNetServerNetworkCore::send() {
 							skipFlag = true;
 						}
 
-						client->sendBuff->DirectMoveDequeueOffset(sendLen);
+						client->sendBuff.DirectMoveDequeueOffset(sendLen);
 						if (skipFlag) {
 							break;
 						}

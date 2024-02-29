@@ -62,8 +62,8 @@ struct SessionManager {
 			remoteVec[hostID] = reinterpret_cast<stJNetSession*>(sessionPool->AllocMem());
 
 			// placement_new
-			new (remoteVec[hostID]) stJNetSession(sock, recvBuffSize, sendBuffSize);
-			remoteVec[hostID]->hostID = hostID;
+			//new (remoteVec[hostID]) stJNetSession(sock, recvBuffSize, sendBuffSize);
+			new (remoteVec[hostID]) stJNetSession(sock, hostID);
 			
 			if (frontSession == nullptr) {
 				frontSession = remoteVec[hostID];

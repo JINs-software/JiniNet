@@ -7,8 +7,8 @@
 #include "JNetSession.h"
 #include "JNetBatchProcess.h"
 
-#define SERV_RECV_BUFF_SIZE 20'000
-#define SERV_SEND_BUFF_SIZE 20'000
+#define SERV_RECV_BUFF_SIZE 1'000
+#define SERV_SEND_BUFF_SIZE 1'000
 
 class JNetServer
 {
