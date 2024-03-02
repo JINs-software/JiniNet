@@ -50,8 +50,10 @@ public:
 #if defined(THREAD_SAFE)
 		std::lock_guard<std::mutex> lock(_mutex);
 #endif
-		*reinterpret_cast<uint64*>(ptr + _unitSize) = reinterpret_cast<uint64>(freeListFront);
-		freeListFront = ptr;
+		if (listFront <= ptr && ptr <= listFront + (_unitSize + sizeof(BYTE*)) * _unitCnt) {
+			*reinterpret_cast<uint64*>(ptr + _unitSize) = reinterpret_cast<uint64>(freeListFront);
+			freeListFront = ptr;
+		}
 	}
 
 private:

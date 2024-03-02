@@ -246,7 +246,9 @@ bool JNetServerNetworkCore::receive() {
 							//     콘텐츠의 DeleteFighter 함수 호출
 							// (2) 추후 일괄적으로 네트워크 코어 측에서 관리하는 삭제 세션 셋 일괄 삭제
 							if (Disconnect(hID)) {
+#if defined(PRINT_CONSOLE_LOG_ON)
 								cout << "recv() return SOCKET_ERROR(" << errCode << ") | hostID: " << hID << endl;
+#endif
 								eventHandler->OnClientDisconnect(hID);
 							}
 						}
@@ -263,7 +265,9 @@ bool JNetServerNetworkCore::receive() {
 
 						// 위 에러 분기와 마찬가지로 중복 삭제를 막기 위해 순서를 변경
 						if (Disconnect(hID)) {
+#if defined(PRINT_CONSOLE_LOG_ON)
 							cout << "recv() return 0, TCP 정상 종료 | hostID: " << hID << endl;
+#endif
 							eventHandler->OnClientDisconnect(hID);
 						}
 						break;
@@ -426,7 +430,9 @@ bool JNetServerNetworkCore::send() {
 							//	Disconnect(hID);
 							//}
 							if (Disconnect(hID)) {
+#if defined(PRINT_CONSOLE_LOG_ON)
 								cout << "send() return SOCKET_ERROR( " << errCode << ") | hostID: " << hID << endl;
+#endif
 								eventHandler->OnClientDisconnect(hID);
 							}
 						}
@@ -444,10 +450,12 @@ bool JNetServerNetworkCore::send() {
 							//	(1) 그냥 끊는다.
 							//	(2) 조금더 기다린다(?)
 
+#if defined (PRINT_CONSOLE_LOG_ON)
 							std::cout << "[SEND] sendLen < len : TCP 송신 버퍼 공간 부족" << std::endl;
 							// 또는 상대측 수신 버퍼 공간 부족??
 							std::cout << "[SEND] sendLen < len : 상대측 TCP 수신 버퍼 공간 부족??" << std::endl;
 							ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::send", L"sendLen < len");
+#endif
 
 							// 일단 연결을 끊지 않고 송신 루프의 다음 턴으로 넘김
 							//if (Disconnect(hID)) {

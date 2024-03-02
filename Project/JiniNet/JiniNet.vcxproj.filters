@@ -57,9 +57,6 @@
     <ClInclude Include="..\..\Include\JNetSession.h">
       <Filter>Session</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\JNetMsgConfig.h">
-      <Filter>Session</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\JNetRPC.h">
       <Filter>RPC</Filter>
     </ClInclude>
@@ -83,6 +80,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\JNetServerEventHandler.h">
       <Filter>JNetEventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetCoreConfig.h">
+      <Filter>JNetworkCore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\JNetCoreDefine.h">
+      <Filter>JNetworkCore</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

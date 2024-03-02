@@ -8,9 +8,5 @@
 // RPC 함수에 buff << 헤더는 생성되지 않게 함.
 // 즉, one-way에서는 자체 헤더가 RPC의 파라미터가 되도록...
 
-typedef unsigned int HostID;
 typedef unsigned short RpcID;
-
-#define HOST_ID_LIMIT 20000
-
 #define ONEWAY_RPCID 0

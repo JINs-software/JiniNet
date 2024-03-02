@@ -1,7 +1,6 @@
 #pragma once
 #include "JNetEventHandler.h"
-#include "JNetMsgConfig.h"
-
+#include "JNetCoreDefine.h"
 
 
 class JNetServerEventHandler : public JNetEventHandler

@@ -3,7 +3,6 @@
 #include "JNetServerEventHandler.h"
 #include "JNetProxy.h"
 #include "JNetStub.h"
-#include "JNetMsgConfig.h"
 #include "JNetSession.h"
 #include "JNetBatchProcess.h"
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "JBuffer.h"
 #include "JNetworkCore.h"
+#include "JNetRPC.h"
 
 class JNetProxy
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include "JBuffer.h"
-#include "JNetMsgConfig.h"
+#include "JNetCoreDefine.h"
 #include "JNetRPC.h"
 
 class JNetStub

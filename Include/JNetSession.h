@@ -1,7 +1,7 @@
 #pragma once
 #include "JBuffer.h"
 #include <WinSock2.h>
-
+#include "JNetCoreDefine.h"
 #include "JNetSessionConfig.h"
 
 struct stJNetSession {

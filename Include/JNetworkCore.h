@@ -1,7 +1,7 @@
 #pragma once
 #include "SocketUtil.h"
 #include "JBuffer.h"
-#include "JNetMsgConfig.h"
+#include "JNetCoreConfig.h"
 #include "JNetSession.h"
 #include "JNetPool.h"
 
@@ -9,13 +9,6 @@
 #include <Psapi.h>
 #pragma comment(lib, "psapi")
 //#define CHECK_PAGE_FAULT
-
-/*** REMOTE 관리 ***/
-//#define REMOTE_MAP
-#define REMOTE_VEC
-
-/*** 프록시의 다이렉트 세션 접근 ***/
-#define DIRECT_ACCESS_TO_JNETSESSION
 
 /*** 관리 메시지 번호 ***/
 #define JNET_UNIQUE_MSG_NUM 0x88;
