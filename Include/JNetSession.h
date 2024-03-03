@@ -26,23 +26,4 @@ struct stJNetSession {
 	~stJNetSession() {
 		closesocket(sock);
 	}
-
-//	stJNetSession(SOCKET sock, UINT recvBuffSize, UINT sendBuffSize) 
-//		: recvBuff(recvBuffSize), sendBuff(sendBuffSize)
-//	{
-//		this->sock = sock;
-//		recvBuff = new JBuffer(recvBuffSize);
-//		sendBuff = new JBuffer(sendBuffSize);
-//
-////#ifdef REMOTE_VEC
-//		prevSession = nullptr;
-//		nextSession = nullptr;
-////#endif // REMOTE_VEC
-//	}
-//	~stJNetSession() {
-//		closesocket(sock);
-//		delete recvBuff;
-//		delete sendBuff;
-//	}
-
 };
