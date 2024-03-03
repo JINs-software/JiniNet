@@ -25,6 +25,9 @@ bool JNetworkCore::sendSet() {
 }
 
 void JNetworkCore::batchDisconnection() {
+	// 제한 변수 초기화
+	deleteCnt = 0;
+
 	for (HostID remote : disconnectedSet) {
 #ifdef REMOTE_MAP
 		if (remoteMap.find(remote) != remoteMap.end()) {

@@ -29,7 +29,7 @@ struct SessionManager {
 		sessionPool = new JiniPool(sizeof(stJNetSession), HOST_ID_LIMIT);
 		remoteVec.resize(HOST_ID_LIMIT, nullptr);
 		//for (uint32 i = HOST_ID_LIMIT - 1; i >= 3; i--) {
-		for(uint32 i = 3; i < HOST_ID_LIMIT; i++) {
+		for (uint32 i = 3; i < HOST_ID_LIMIT; i++) {
 			availableID.push(i);
 		}
 
@@ -57,7 +57,7 @@ struct SessionManager {
 			// placement_new
 			//new (remoteVec[hostID]) stJNetSession(sock, recvBuffSize, sendBuffSize);
 			new (remoteVec[hostID]) stJNetSession(sock, hostID);
-			
+
 			if (frontSession == nullptr) {
 				frontSession = remoteVec[hostID];
 			}
@@ -70,7 +70,17 @@ struct SessionManager {
 	}
 	// Delete
 	inline void DeleteSession(HostID hostID) {
+		// 예외 처리
+		if (remoteVec[hostID] == NULL) {
+			// 코어 측에서 삭제와 컨텐츠 쪽에서의 삭제 요청이 한 번의 게임 루프에서 동시에 발생할 수 있나?
+			return;
+		}
+
+		// 위에서 예외 처리한 것처럼 한번의 게임 루프에서 코어 측, 컨텐츠 요청 측 삭제가 하나의 ID에 중복될 수 있음을 고려
+		// 기존에 한 번의 루프 내 중복 삭제, 중복 가용 ID 큐 삽입으로 인해 컨텐츠 단에서 충돌이 발생하였음(CreateFighter).
+		// 이미 활성화된 ID가 클라이언트 맵에 존재하는데 같은 ID로 생성을 시도하려는 충돌 발생
 		availableID.push(hostID);
+
 		if (remoteVec[hostID] == frontSession) {
 			//frontSession = nullptr;
 			frontSession = frontSession->nextSession;
@@ -113,6 +123,12 @@ protected:
 	fd_set readSet;
 	fd_set writeSet;
 
+	////////////////////////////////////
+	// 한 번에 삭제할 수 있는 세션 제한
+	////////////////////////////////////
+	const uint16 deleteLimit = 10;
+	uint16 deleteCnt = 0;
+
 public:
 	JNetworkCore();
 	inline bool Receive() {
@@ -150,8 +166,15 @@ public:
 		batchDisconnection();
 		return ret;
 	}
+
 	inline bool Disconnect(HostID remote) {
+		if (deleteCnt++ > deleteLimit) {
+			return false;
+		}
+
 		if (disconnectedSet.find(remote) == disconnectedSet.end()) {
+			//cout << "deleteCnt: " << deleteCnt << endl;
+			//cout << "disconnectedSet.size(): " << disconnectedSet.size() << endl;
 			disconnectedSet.insert(remote);
 			return true;
 		}

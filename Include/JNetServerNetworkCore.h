@@ -43,7 +43,6 @@ public:
 	}
 
 	bool Start(const stServerStartParam param);
-	bool CloseConnection(HostID clientID);
 
 private:
 	bool receiveSet() override;
