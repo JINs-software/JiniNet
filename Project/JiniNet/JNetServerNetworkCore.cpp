@@ -39,10 +39,7 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 	//	(const char*)&option, // 옵션 포인터
 	//	sizeof(option));      //옵션 크기
 
-	// IP 지정 방식
-	//SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
-	SOCKADDR_IN serverAddr = CreateServerADDR(param.Port);
-
+	SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
 	BindSocket(sock, serverAddr);
 	//ListenSocket_SOMAXCONNHINT(sock, 1000);
 	if (listen(sock, SOMAXCONN_HINT(1000)) == SOCKET_ERROR) {
@@ -117,6 +114,40 @@ bool JNetServerNetworkCore::receiveSet() {
 	return true;
 }
 bool JNetServerNetworkCore::receive() {
+//	if (FD_ISSET(sock, &readSet)) {
+//		if (eventHandler->OnConnectRequest()) {
+//#ifdef REMOTE_MAP
+//			if (g_HostID > HOST_ID_LIMIT) {
+//				return false;
+//			}
+//#endif // REMOTE_MAP
+//#ifdef REMOTE_VEC
+//			if (sessionMgr.availableID.empty()) {
+//				return false;
+//			}
+//#endif // REMOTE_VEC
+//
+//			SOCKADDR_IN clientAddr;
+//			SOCKET clientSock = AcceptSocket(sock, clientAddr);
+//			
+//			HostID allocID = 0; 
+//
+//#ifdef REMOTE_MAP
+//			allocID = g_HostID++;
+//			remoteMap.insert({ allocID, new stJNetSession(clientSock, SESSION_RECV_BUFF, SESSION_SEND_BUFF) });
+//#endif // REMOTE_MAP
+//#ifdef REMOTE_VEC
+//			sessionMgr.SetSession(clientSock, SESSION_RECV_BUFF, SESSION_SEND_BUFF, allocID);
+//#endif // REMOTE_VEC
+//
+//			if (allocID != 0) {
+//				eventHandler->OnClientJoin(allocID);
+//			}
+//		}
+//	}
+	// TO DO: 클라이언트 통신 소켓 저장 및 아이디 공유
+	// -> JNetServer에서 판단 및 진행
+
 #ifdef REMOTE_MAP
 	auto iter = remoteMap.begin();
 #endif // REMOTE_MAP
@@ -125,9 +156,10 @@ bool JNetServerNetworkCore::receive() {
 #endif // REMOTE_VEC
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
-		///////////////////////////////////////////////////////////////////
-		// Listen Socket 확인 (리슨 소켓 확인 작업을 더 빈번하게 하도록 함)
-		///////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////
+		// Listen Socket 확인 
+		// 리슨 소켓 확인 작업을 더 빈번하게 하도록 함
+		/////////////////////////////////////////////////
 		JNetworkCore::receiveSet();
 		if (FD_ISSET(sock, &readSet)) {
 			if (eventHandler->OnConnectRequest()) {
@@ -138,7 +170,6 @@ bool JNetServerNetworkCore::receive() {
 #endif // REMOTE_MAP
 #ifdef REMOTE_VEC
 				if (sessionMgr.availableID.empty()) {
-					cout << "No AvailableID !!" << endl;
 					return false;
 				}
 #endif // REMOTE_VEC
