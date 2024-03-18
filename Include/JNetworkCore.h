@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include "SocketUtil.h"
 #include "JBuffer.h"
 #include "JNetCoreConfig.h"
@@ -25,12 +26,14 @@ struct SessionManager {
 	stJNetSession* frontSession;
 	//stJNetSession endSession;
 
+	unsigned int connectedSessionCount = 0;
+
 	SessionManager() {
 		sessionPool = new JiniPool(sizeof(stJNetSession), HOST_ID_LIMIT);
 		remoteVec.resize(HOST_ID_LIMIT, nullptr);
 		//for (uint32 i = HOST_ID_LIMIT - 1; i >= 3; i--) {
 		for (uint32 i = 3; i < HOST_ID_LIMIT; i++) {
-			availableID.push(i);
+			availableID.push(i);	// 사용될 수 있는 ID는 3 ~ (HOST_ID_LIMIT - 1)
 		}
 
 		frontSession = nullptr;
@@ -53,6 +56,8 @@ struct SessionManager {
 			hostID = availableID.front(); //availableID.top();
 			availableID.pop();
 			remoteVec[hostID] = reinterpret_cast<stJNetSession*>(sessionPool->AllocMem());
+			assert(remoteVec[hostID] != NULL);
+			
 
 			// placement_new
 			//new (remoteVec[hostID]) stJNetSession(sock, recvBuffSize, sendBuffSize);
@@ -63,16 +68,23 @@ struct SessionManager {
 			}
 			else {
 				remoteVec[hostID]->nextSession = frontSession;
+				assert(frontSession->prevSession == NULL);		// 로직 상 기존 frontSession의 prev는 항상 NULL이어야만 함.
 				frontSession->prevSession = remoteVec[hostID];
 				frontSession = remoteVec[hostID];
 			}
+
+			connectedSessionCount++;
 		}
 	}
 	// Delete
 	inline void DeleteSession(HostID hostID) {
-		// 예외 처리
 		if (remoteVec[hostID] == NULL) {
 			// 코어 측에서 삭제와 컨텐츠 쪽에서의 삭제 요청이 한 번의 게임 루프에서 동시에 발생할 수 있나?
+
+			//assert(remoteVec[hostID] != NULL);	// 라이브러리 단에서 동일 ID에 대해 중복 삭제가 진행되는지 체크
+			// 라이브러리 차원에서 연결 종료 또는 강제 종료를 감지하여 deleteSet에 ID를 담고 일괄적으로 삭제하는 작업,
+			// 그리고 동일 루프에 캐릭터가 HP가 0이 되어 ForcedDisconnect 함수를 호출하여 라이브러리에 forcedDeleteSet에 ID를 담고 일괄적으로 삭제하는 작업
+			// 이 두 작업이 한 번의 게임 루프에서 일어날 수 있다. 따라서 일단 임시방편으로 예외가 아닌 것으로 판단하고 assert를 지운다.
 			return;
 		}
 
@@ -84,6 +96,10 @@ struct SessionManager {
 		if (remoteVec[hostID] == frontSession) {
 			//frontSession = nullptr;
 			frontSession = frontSession->nextSession;
+			if (frontSession != NULL) {
+				frontSession->prevSession = NULL;
+			}
+
 		}
 		else {
 			remoteVec[hostID]->prevSession->nextSession = remoteVec[hostID]->nextSession;
@@ -96,11 +112,18 @@ struct SessionManager {
 		remoteVec[hostID]->~stJNetSession();
 		sessionPool->ReturnMem(reinterpret_cast<BYTE*>(remoteVec[hostID]));
 		remoteVec[hostID] = nullptr;
+
+		assert(connectedSessionCount != 0);
+		connectedSessionCount--;
 	}
 
 	// GetSessionFront
 	inline stJNetSession* GetSessionFront() {
 		return frontSession;
+	}
+
+	inline unsigned int GetConnectedSessionCount() {
+		return connectedSessionCount;
 	}
 };
 
@@ -119,6 +142,7 @@ protected:
 	std::set<HostID> disconnectedSet;
 	std::set<HostID> forcedDisconnectedSet;
 	SOCKET sock;
+
 protected:
 	fd_set readSet;
 	fd_set writeSet;

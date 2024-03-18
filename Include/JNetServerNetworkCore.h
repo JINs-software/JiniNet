@@ -44,6 +44,10 @@ public:
 
 	bool Start(const stServerStartParam param);
 
+	inline unsigned int GetConnectedSessionCnt() {
+		return sessionMgr.connectedSessionCount;
+	}
+
 private:
 	bool receiveSet() override;
 	bool receive() override;

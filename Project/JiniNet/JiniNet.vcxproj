@@ -39,6 +39,7 @@
     <ClInclude Include="Proxy.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Include\JNetBatchProcess.cpp" />
     <ClCompile Include="JMemoryHistory.cpp" />
     <ClCompile Include="JNetClient.cpp" />
     <ClCompile Include="JNetClientEventHandler.cpp" />

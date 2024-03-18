@@ -45,6 +45,8 @@ public:
 	void FrameMove();
 	void FrameMove(uint16 loopDelta);
 
+	void ConsolePrintLog();
+
 private:
 
 };

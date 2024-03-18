@@ -119,5 +119,6 @@
     <ClCompile Include="JMemoryHistory.cpp">
       <Filter>JiniPool</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Include\JNetBatchProcess.cpp" />
   </ItemGroup>
 </Project>

@@ -211,9 +211,25 @@ bool JNetServerNetworkCore::receive() {
 							//}
 							//=> 이미 삭제 요청된 클라이언트에 중복으로 에러가 뜰 수 있음
 
-							// (1) 세션 삭제는 1차적으로 이벤트 핸들러를 거쳐 컨텐츠 단에서 삭제하도록 요청
-							//     콘텐츠의 DeleteFighter 함수 호출
-							// (2) 추후 일괄적으로 네트워크 코어 측에서 관리하는 삭제 세션 셋 일괄 삭제
+							// 세션 삭제는 1차적으로 이벤트 핸들러를 거쳐 컨텐츠 단에서 삭제하도록 요청하도록 하였다.
+							//		(컨텐츠)
+							//		-> 콘텐츠의 DeleteFighter 함수 호출, g_DeleteClientSet<hostID, netCoreSideFlag>.insert(..);
+							//		-> g_DeleteClientSet에 삽입된 삭제 대상 ID들에 대해 BatchProcess에서 일괄적으로 삭제함
+							//			(FrameMove)
+							//			- Receive
+							//				- 삭제 대상 세션 일괄 삭제
+							//			- BatchProcess	// BatchDelete
+							//			- Send
+							//				- 삭제 대상 세션 일괄 삭제
+							// 그러나 분석해보니 위와 같이 콘텐츠 단의 DeleteFigther는 사실상 삭제 대상 플레이어 셋에 추가하는 것이고,
+							// BatchProcess 단계에서 삭제 플레이어 셋에 대해 일괄적으로 삭제한다. 
+							// 결국 라이브러리 세션 측 삭제가 먼저 일어난다는 것이다. 
+							// 
+							// BatchDelete에서는 삭제 대상 주변의 플레이어들에게 DEL_CHARACTER 메시지를 일괄적으로 전송하게 되는데, 
+							// 주변 플레이어들의 링버퍼를 직접 참조하여 직렬적으로 메시지를 복사시킨다. 
+							// 문제는 주변 플레이어를 참조하는데 있어 GetJNetSession 함수를 호출하는데, 이미 삭제한 세션이 있다면 NULL을 반환하게 된다.
+							// 컨텐츠 플레이어 삭제 -> 세션 삭제 가정된 코드였기에 NULL 반환이 의심스러웠는데, 사실상 어쩔 수 없이 NULL이 반환되는 상황이다.
+							// 전적으로 컨텐츠 쪽 삭제가 먼저 일어나도록 코드를 수정하기 보단 GetJNetSession NULL 반환에 대한 예외 작업을 하지 않도록 임시적으로 조치한다.
 							if (Disconnect(hID)) {
 #if defined(PRINT_CONSOLE_LOG_ON)
 								cout << "recv() return SOCKET_ERROR(" << errCode << ") | hostID: " << hID << endl;
