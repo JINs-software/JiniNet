@@ -12,38 +12,36 @@
 class JNetServer
 {
 private:
-	JNetServerNetworkCore* networkCore;
-	JNetBatchProcess* batchProcess;
-	JBuffer* recvBuff;
-	JBuffer* sendBuff;
+	JNetCoreServer*		m_NetworkCore;
+	JNetBatchProcess*		m_BatchProcess;
 
-	std::map<HostID, stJNetSession> sessions;
+	std::map<HostID, stJNetSession> m_Sessions;
 
 public:
-	JNetServer(bool interactive = true);
+	JNetServer(bool interactive);
 
 	inline void AttachEventHandler(JNetServerEventHandler* eventHandler) {
-		networkCore->AttachEventHandler(eventHandler);
+		m_NetworkCore->AttachEventHandler(eventHandler);
 	}
 	inline void AttachProxy(JNetProxy* proxy, BYTE unique) {
-		proxy->netcore = networkCore;
+		proxy->netcore = m_NetworkCore;
 		proxy->uniqueNum = unique;
 	}
 	inline void AttachStub(JNetStub* stub, BYTE unique) {
-		networkCore->AttachStub(stub);
+		m_NetworkCore->AttachStub(stub);
 		stub->uniqueNum = unique;
 	}
 	inline void AttachBatchProcess(JNetBatchProcess* batch) {
-		if (!batchProcess) {
-			delete batchProcess;
+		if (!m_BatchProcess) {
+			delete m_BatchProcess;
 		}
-		batchProcess = batch;
+		m_BatchProcess = batch;
 	}
-	inline void Start(const stServerStartParam& param) {
-		networkCore->Start(param);
-	}
-	void FrameMove();
-	void FrameMove(uint16 loopDelta);
+
+	void Start(const stServerStartParam& param, long msecPerFrame);
+
+private:
+	void FrameMove(uint16 frameDelta);
 
 	void ConsolePrintLog();
 

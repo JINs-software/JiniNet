@@ -1,24 +1,24 @@
 #pragma once
 
-//typedef unsigned char HostID;
-//typedef unsigned char RpcID;
-// TO DO: 현재 FightGame의 one-way를 맞추어 HostID와 RpcID의 자료형이 BYTE임
-// 기존적으로 JNetRPC의 HostID와 RpcID의 자료형은 UINT와 USHORT로 선언
-// 그리고 FightGame과 같이 자체 헤더가 정의된 one-way이 방식에선 json에 자체 헤더를 선언하고,
-// RPC 함수에 buff << 헤더는 생성되지 않게 함.
-// 즉, one-way에서는 자체 헤더가 RPC의 파라미터가 되도록...
+// FightGame의 패킷 사이즈와 패킷 타입 자료형은 Byte, 따라서  RpcID의 자료형이 BYTE가 되어야 함.
+// 추후 JPD 컴파일러를 통해 패킷 헤더를 생성하고, 가변적인 크기의 헤더를 적용할 수 있도록 함
 
-typedef unsigned short RpcID;
-#define ONEWAY_RPCID 0
+typedef unsigned char RpcID;
 
-#define HDR_UNIQUE_NUM_TYPE				unsigned char
-#define HDR_MSG_ID_TYPE					unsigned short
-#define HDR_MSG_LEN_TYPE				unsigned short
+//#define HDR_UNIQUE_NUM_TYPE				unsigned char
+//#define HDR_MSG_ID_TYPE					unsigned short
+//#define HDR_MSG_LEN_TYPE				unsigned short
 
-struct stJMSG_HDR {
-	HDR_UNIQUE_NUM_TYPE		uniqueNum;
-	HDR_MSG_ID_TYPE			msgID;
-	HDR_MSG_LEN_TYPE		msgLen;
+#pragma pack(push, 1)
+struct stMSG_HDR {
+	//HDR_UNIQUE_NUM_TYPE		uniqueNum;
+	//HDR_MSG_ID_TYPE			msgID;
+	//HDR_MSG_LEN_TYPE		msgLen;
+
+	unsigned char			byCode;
+	unsigned char			bySize;
+	unsigned char			byType;
 };
+#pragma pack(pop)
 
 #define UNIQUE_PACK_NUM 0x77

@@ -1,16 +1,52 @@
 #include "JNetworkCore.h"
 
 JNetworkCore::JNetworkCore() {
-	FD_ZERO(&readSet);
-	FD_ZERO(&writeSet);
+	//FD_ZERO(&readSet);
+	//FD_ZERO(&writeSet);
+	//InitWindowSocketLib(&wsaData);
+	//m_Socket = CreateWindowSocket_IPv4(true);
+
 	InitWindowSocketLib(&wsaData);
-	sock = CreateWindowSocket_IPv4(true);
+
 }
 
+JNetworkCore::~JNetworkCore()
+{
+	CleanUpWindowSocketLib();
+}
+
+void JNetworkCore::Start(long msecPerFrame)
+{
+	timeBeginPeriod(1);
+
+	uint16	frameDelta;
+	clock_t timeStamp = clock();
+	clock_t accumulation = 0;
+	while (true) {
+		clock_t timeNow = clock();
+		clock_t timeDuration = timeNow - timeStamp;
+		timeStamp = timeNow;
+		accumulation += timeDuration;
+		frameDelta = accumulation / msecPerFrame;
+		accumulation %= msecPerFrame;
+		FrameMove(frameDelta);
+	}
+
+	timeEndPeriod(1);
+}
+
+void JNetworkCore::FrameMove(uint16 frameDelta)
+{
+	Receive();
+	m_BatchProcess->BatchProcess(frameDelta);
+	Send();
+}
+
+/*
 bool JNetworkCore::receiveSet()
 {
 	FD_ZERO(&readSet);
-	FD_SET(sock, &readSet);
+	FD_SET(m_Socket, &readSet);
 	timeval tval = { 0, 0 };
 	int retSel = select(0, &readSet, nullptr, nullptr, &tval);
 	if (retSel == SOCKET_ERROR) {
@@ -29,33 +65,16 @@ void JNetworkCore::batchDisconnection() {
 	deleteCnt = 0;
 
 	for (HostID remote : disconnectedSet) {
-#ifdef REMOTE_MAP
-		if (remoteMap.find(remote) != remoteMap.end()) {
-			delete remoteMap[remote];
-			remoteMap.erase(remote);
-			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
-		}
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-		sessionMgr.DeleteSession(remote);
-#endif // REMOTE_VEC
+		m_SessionMgr.DeleteSession(remote);
 	}
 	disconnectedSet.clear();
 
 	for (HostID remote : forcedDisconnectedSet) {
-#ifdef REMOTE_MAP
-		if (remoteMap.find(remote) != remoteMap.end()) {
-			delete remoteMap[remote];
-			remoteMap.erase(remote);
-			// TO DO: erase 시 stJNetSession 객체가 정상적으로 반환되는가?
-		}
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-		sessionMgr.DeleteSession(remote);
-#endif // REMOTE_VEC
+		m_SessionMgr.DeleteSession(remote);
 	}
 	forcedDisconnectedSet.clear();
 }
+*/
 
 void JNetworkCore::ERROR_EXCEPTION_WINDOW(const WCHAR* wlocation, const WCHAR* wcomment, int errcode) {
 	std::wstring wstr = wlocation;

@@ -1,51 +1,66 @@
-#include "JNetServerNetworkCore.h"
+#include "JNetCoreServer.h"
 #include <cassert>
+
+using namespace std;
 
 static HostID g_HostID = 3;
 
-JNetServerNetworkCore::JNetServerNetworkCore() {
-	eventHandler = new JNetServerEventHandler();
-
-	//FD_ZERO(&remoteReadSet);
-	//remoteReadSets.push_back(fd_set());
-	//FD_ZERO(&remoteReadSets[0]);
+void JNetCoreServer::AttachEventHandler(JNetServerEventHandler* eventHandler) {
+	this->m_EventHandler = eventHandler;
+}
+void JNetCoreServer::AttachProxy(JNetProxy* proxy, BYTE unique) {
+	proxy->netcore = this;
+	proxy->uniqueNum = unique;
+}
+void JNetCoreServer::AttachStub(JNetStub* stub, BYTE unique) {
+	RpcID* rpcList = stub->GetRpcList();
+	int rpcListCnt = stub->GetRpcListCount();
+	for (int i = 0; i < rpcListCnt; i++) {
+		m_StupMap.insert({ rpcList[i], stub });
+	}
+	stub->uniqueNum = unique;
+}
+void JNetCoreServer::AttachBatchProcess(JNetBatchProcess* batch) {
+	//if (!m_BatchProcess) {
+	//	delete m_BatchProcess;
+	//}
+	m_BatchProcess = batch;
 }
 
-bool JNetServerNetworkCore::Start(const stServerStartParam param) {
-	//// 논-블로킹 소켓 전환
+bool JNetCoreServer::Init(uint16 port, std::string IP)
+{
+	// 리슨 소켓 및 Accept fd set 초기화
+	m_ListenSocket = CreateWindowSocket_IPv4(true);
+	FD_ZERO(&m_AcceptSet);
+
+	// 논-블로킹 소켓 전환
 	u_long on = 1;
-	if (ioctlsocket(sock, FIONBIO, &on) == SOCKET_ERROR) {
+	if (ioctlsocket(m_ListenSocket, FIONBIO, &on) == SOCKET_ERROR) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"ioctlsocket(..) == SOCKET_ERROR");
 	}
+
 	// SO_REUSEADDR 옵션 적용
 	int32 optval = 1;
-	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval)) == SOCKET_ERROR) {
+	if (setsockopt(m_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(optval)) == SOCKET_ERROR) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_REUSEADDR) == SOCKET_ERROR");
 	}
+
 	// 서버 측에서 강제 종료 요청을 통한 종료이든, 클라이언트 측의 정상/비정상 종료 처리 시작이든 
 	// TCP 강제 종료를 수행
 	// => 링커 1/0 옵션 설정 (TCP 대기 소켓에 적용하여 accept 함수로 리턴되는 소켓은 자동으로 이 옵션으로 설정됨
 	LINGER lingerOptval;
 	lingerOptval.l_onoff = 1;
 	lingerOptval.l_linger = 0;
-	if (setsockopt(sock, SOL_SOCKET, SO_LINGER, (char*)&lingerOptval, sizeof(lingerOptval)) == SOCKET_ERROR) {
+	if (setsockopt(m_ListenSocket, SOL_SOCKET, SO_LINGER, (char*)&lingerOptval, sizeof(lingerOptval)) == SOCKET_ERROR) {
 		ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::Start ", L"setsocket(..SO_LINGER) == SOCKET_ERROR");
 	}
 
-	//int option = TRUE;               //네이글 알고리즘 on/off
-	//setsockopt(sock,             //해당 소켓
-	//	IPPROTO_TCP,          //소켓의 레벨
-	//	TCP_NODELAY,          //설정 옵션
-	//	(const char*)&option, // 옵션 포인터
-	//	sizeof(option));      //옵션 크기
-
 	// IP 지정 방식
-	//SOCKADDR_IN serverAddr = CreateServerADDR(param.IP.c_str(), param.Port);
-	SOCKADDR_IN serverAddr = CreateServerADDR(param.Port);
+	SOCKADDR_IN serverAddr = CreateServerADDR(port);
 
-	BindSocket(sock, serverAddr);
-	//ListenSocket_SOMAXCONNHINT(sock, 1000);
-	if (listen(sock, SOMAXCONN_HINT(1000)) == SOCKET_ERROR) {
+	BindSocket(m_ListenSocket, serverAddr);
+	
+	if (listen(m_ListenSocket, SOMAXCONN_HINT(1000)) == SOCKET_ERROR) {
 		int32 errCode = ::WSAGetLastError();
 		cout << "[ERR]: " << errCode << endl;
 	}
@@ -53,40 +68,50 @@ bool JNetServerNetworkCore::Start(const stServerStartParam param) {
 	return true;
 }
 
-bool JNetServerNetworkCore::receiveSet() {
+stJNetSession* JNetCoreServer::GetJNetSession(HostID hostID)
+{
+	return m_SessionManager.GetSession(hostID);
+}
+
+void JNetCoreServer::RequestDisconnection(HostID hostID)
+{
+	registDisconnection(hostID);
+}
+
+void JNetCoreServer::Receive()
+{
+	receiveSet();
+	receive();
+	cleanUpSession();
+}
+
+void JNetCoreServer::Send()
+{
+	sendSet();
+	send();
+	cleanUpSession();
+}
+
+
+void JNetCoreServer::receiveSet() {
 	// 리슨 소켓 등록은 receive 함수에서 클라이언트 select 루프에서 진행한다.
 	// 더 빈번하게 연결 요청을 확인하기 위해서이다.
 	//JNetworkCore::receiveSet();
 
 	/* 클라이언트 통신 소켓 64 초과 로직 추가 */
-//#ifdef REMOTE_MAP
-#if defined(REMOTE_MAP)
-	auto iter = remoteMap.begin();
-#elif defined(REMOTE_VEC)
-	stJNetSession* session = sessionMgr.GetSessionFront();
-#endif // REMOTE_VEC
+	stJNetSession* session = m_SessionManager.GetSessionFront();
 
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
-		if (remoteReadSets.size() <= sidx) {
-			remoteReadSets.push_back(fd_set());
+		if (m_RemoteReadSets.size() <= sidx) {
+			m_RemoteReadSets.push_back(fd_set());
 		}
-		fd_set& remoteReadSet = remoteReadSets[sidx];
+		fd_set& remoteReadSet = m_RemoteReadSets[sidx];
 		FD_ZERO(&remoteReadSet);
 		bool setFlag = false;
 
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			const stJNetSession* client = nullptr;
-#ifdef REMOTE_MAP
-			if (iter == remoteMap.end()) {
-				endFlag = true;
-				break;
-			}
-			else {
-				client = iter->second;
-			}
-#endif // DEBUG
-#ifdef REMOTE_VEC
 			if (session == nullptr) {
 				endFlag = true;
 				break;
@@ -94,70 +119,46 @@ bool JNetServerNetworkCore::receiveSet() {
 			else {
 				client = session;
 			}
-#endif // REMOTE_VEC
 			FD_SET(client->sock, &remoteReadSet);
 			setFlag = true;
-#ifdef REMOTE_MAP
-			iter++;
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
 			session = session->nextSession;
-#endif // REMOTE_VEC
 		}
 		if (setFlag) {
 			timeval tval = { 0, 0 };
 			int retSel = select(0, &remoteReadSet, nullptr, nullptr, &tval);
 			if (retSel == SOCKET_ERROR) {
 				ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::ReceiveSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
-				return false;
+				DebugBreak();
 			}
 		}
 	}
-
-	return true;
 }
-bool JNetServerNetworkCore::receive() {
-#ifdef REMOTE_MAP
-	auto iter = remoteMap.begin();
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-	stJNetSession* session = sessionMgr.GetSessionFront();
-#endif // REMOTE_VEC
+
+void JNetCoreServer::receive() {
+	stJNetSession* session = m_SessionManager.GetSessionFront();
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
 		///////////////////////////////////////////////////////////////////
 		// Listen Socket 확인 (리슨 소켓 확인 작업을 더 빈번하게 하도록 함)
 		///////////////////////////////////////////////////////////////////
-		JNetworkCore::receiveSet();
-		if (FD_ISSET(sock, &readSet)) {
-			if (eventHandler->OnConnectRequest()) {
-#ifdef REMOTE_MAP
-				if (g_HostID > HOST_ID_LIMIT) {
-					return false;
-				}
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-				if (sessionMgr.availableID.empty()) {
-					cout << "No AvailableID !!" << endl;
-					return false;
-				}
-#endif // REMOTE_VEC
+		FD_ZERO(&m_AcceptSet);
+		FD_SET(m_ListenSocket, &m_AcceptSet);
+		timeval tval = { 0, 0 };
+		int retSel = select(0, &m_AcceptSet, nullptr, nullptr, &tval);
+		if (retSel == SOCKET_ERROR) {
+			ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::ReceiveSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
+			DebugBreak();
+		}
+		if (FD_ISSET(m_ListenSocket, &m_AcceptSet)) {
+			if (m_EventHandler->OnConnectRequest()) {
+				if (m_SessionManager.SessionAllocable()) {
+					SOCKADDR_IN clientAddr;
+					SOCKET clientSock = AcceptSocket(m_ListenSocket, clientAddr);
 
-				SOCKADDR_IN clientAddr;
-				SOCKET clientSock = AcceptSocket(sock, clientAddr);
-
-				HostID allocID = 0;
-
-#ifdef REMOTE_MAP
-				allocID = g_HostID++;
-				remoteMap.insert({ allocID, new stJNetSession(clientSock, SESSION_RECV_BUFF, SESSION_SEND_BUFF) });
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-				sessionMgr.SetSession(clientSock, SESSION_RECV_BUFF, SESSION_SEND_BUFF, allocID);
-#endif // REMOTE_VEC
-
-				if (allocID != 0) {
-					eventHandler->OnClientJoin(allocID);
+					HostID allocID = 0;
+					if (m_SessionManager.SetSession(clientSock, SESSION_RECV_BUFF, SESSION_SEND_BUFF, allocID)) {
+						m_EventHandler->OnClientJoin(allocID);
+					}
 				}
 			}
 		}
@@ -168,17 +169,7 @@ bool JNetServerNetworkCore::receive() {
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			stJNetSession* client = nullptr;
 			HostID hID = 0;
-#ifdef REMOTE_MAP
-			if (iter == remoteMap.end()) {
-				endFlag = true;
-				break;
-			}
-			else {
-				client = iter->second;
-				hID = iter->first;
-			}
-#endif // DEBUG
-#ifdef REMOTE_VEC
+
 			if (session == nullptr) {
 				endFlag = true;
 				break;
@@ -187,8 +178,8 @@ bool JNetServerNetworkCore::receive() {
 				client = session;
 				hID = session->hostID;
 			}
-#endif // REMOTE_VEC
-			fd_set& remoteReadSet = remoteReadSets[sidx];
+
+			fd_set& remoteReadSet = m_RemoteReadSets[sidx];
 			if (FD_ISSET(client->sock, &remoteReadSet)) {	// client->sock은 논-블로킹 모드의 소켓
 				while (true) {
 					// 다이렉트로 받을 수 있는 만큼 씩 받는다. 만약 TCP 수신 버퍼에 데이터가 남아있는데, 다이렉트 용량이 부족하다면 while(true)루프로 받을 수 있다.
@@ -230,11 +221,8 @@ bool JNetServerNetworkCore::receive() {
 							// 문제는 주변 플레이어를 참조하는데 있어 GetJNetSession 함수를 호출하는데, 이미 삭제한 세션이 있다면 NULL을 반환하게 된다.
 							// 컨텐츠 플레이어 삭제 -> 세션 삭제 가정된 코드였기에 NULL 반환이 의심스러웠는데, 사실상 어쩔 수 없이 NULL이 반환되는 상황이다.
 							// 전적으로 컨텐츠 쪽 삭제가 먼저 일어나도록 코드를 수정하기 보단 GetJNetSession NULL 반환에 대한 예외 작업을 하지 않도록 임시적으로 조치한다.
-							if (Disconnect(hID)) {
-#if defined(PRINT_CONSOLE_LOG_ON)
-								cout << "recv() return SOCKET_ERROR(" << errCode << ") | hostID: " << hID << endl;
-#endif
-								eventHandler->OnClientDisconnect(hID);
+							if (registDisconnection(hID)) {
+								m_EventHandler->OnClientDisconnect(hID);
 							}
 						}
 
@@ -249,73 +237,48 @@ bool JNetServerNetworkCore::receive() {
 						//}
 
 						// 위 에러 분기와 마찬가지로 중복 삭제를 막기 위해 순서를 변경
-						if (Disconnect(hID)) {
-#if defined(PRINT_CONSOLE_LOG_ON)
-							cout << "recv() return 0, TCP 정상 종료 | hostID: " << hID << endl;
-#endif
-							eventHandler->OnClientDisconnect(hID);
+						if (registDisconnection(hID)) {
+							m_EventHandler->OnClientDisconnect(hID);
 						}
 						break;
 					}
 					else {
 						client->recvBuff.DirectMoveEnqueueOffset(recvLen);
 
-						if (!oneway) {
-							stJMSG_HDR hdr;
+						while (true) {
+							stMSG_HDR hdr;
 							client->recvBuff.Peek(&hdr);
-							if (stupMap.find(hdr.msgID) != stupMap.end()) {
-								stupMap[hdr.msgID]->ProcessReceivedMessage(hID, client->recvBuff);
+							if (sizeof(hdr) + hdr.bySize > client->recvBuff.GetUseSize()) {
+								break;
+							}
+
+							if (m_StupMap.find(hdr.byType) != m_StupMap.end()) {
+								m_StupMap[hdr.byType]->ProcessReceivedMessage(hID, client->recvBuff);
 							}
 							else {
-								ERROR_EXCEPTION_WINDOW(L"receive()", L"Undefined Message");
+								DebugBreak();
 							}
-						}
-						else {
-							stupMap[ONEWAY_RPCID]->ProcessReceivedMessage(hID, client->recvBuff);
 						}
 					}
 				}
 			}
-
-#ifdef REMOTE_MAP
-			iter++;
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
 			session = session->nextSession;
-#endif // REMOTE_VEC
 		}
 	}
-
-	return true;
 }
-bool JNetServerNetworkCore::sendSet() {
-#ifdef REMOTE_MAP
-	auto iter = remoteMap.begin();
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-	stJNetSession* session = sessionMgr.GetSessionFront();
-#endif // REMOTE_VEC
+void JNetCoreServer::sendSet() {
+	stJNetSession* session = m_SessionManager.GetSessionFront();
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
-		if (remoteWriteSets.size() <= sidx) {
-			remoteWriteSets.push_back(fd_set());
+		if (m_RemoteWriteSets.size() <= sidx) {
+			m_RemoteWriteSets.push_back(fd_set());
 		}
-		fd_set& remoteWriteSet = remoteWriteSets[sidx];
+		fd_set& remoteWriteSet = m_RemoteWriteSets[sidx];
 		FD_ZERO(&remoteWriteSet);
 		bool setFlag = false;
 
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			const stJNetSession* client = nullptr;
-#ifdef REMOTE_MAP
-			if (iter == remoteMap.end()) {
-				endFlag = true;
-				break;
-			}
-			else {
-				client = iter->second;
-			}
-#endif // DEBUG
-#ifdef REMOTE_VEC
 			if (session == nullptr) {
 				endFlag = true;
 				break;
@@ -323,51 +286,30 @@ bool JNetServerNetworkCore::sendSet() {
 			else {
 				client = session;
 			}
-#endif // REMOTE_VEC
+
 			FD_SET(client->sock, &remoteWriteSet);
 			setFlag = true;
-#ifdef REMOTE_MAP
-			iter++;
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
+
 			session = session->nextSession;
-#endif // REMOTE_VEC
 		}
 		if (setFlag) {
 			timeval tval = { 0, 0 };
 			int retSel = select(0, nullptr, &remoteWriteSet, nullptr, &tval);
 			if (retSel == SOCKET_ERROR) {
 				ERROR_EXCEPTION_WINDOW(L"JNetServerNetworkCore::sendSet()", L"select(..) == SOCKET_ERROR", WSAGetLastError());
-				return false;
+				DebugBreak();
 			}
 		}
 	}
-
-	return true;
 }
-bool JNetServerNetworkCore::send() {
-#ifdef REMOTE_MAP
-	auto iter = remoteMap.begin();
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
-	stJNetSession* session = sessionMgr.GetSessionFront();
-#endif // REMOTE_VEC
+void JNetCoreServer::send() {
+	stJNetSession* session = m_SessionManager.GetSessionFront();
+
 	bool endFlag = false;
 	for (int sidx = 0; !endFlag; sidx++) {
 		for (int idx = 0; idx < FD_SETSIZE; idx++) {
 			stJNetSession* client = nullptr;
 			HostID hID = 0;
-#ifdef REMOTE_MAP
-			if (iter == remoteMap.end()) {
-				endFlag = true;
-				break;
-			}
-			else {
-				client = iter->second;
-				hID = iter->first;
-			}
-#endif // DEBUG
-#ifdef REMOTE_VEC
 			if (session == nullptr) {
 				endFlag = true;
 				break;
@@ -376,8 +318,8 @@ bool JNetServerNetworkCore::send() {
 				client = session;
 				hID = session->hostID;
 			}
-#endif // REMOTE_VEC
-			fd_set& remoteWriteSet = remoteWriteSets[sidx];
+
+			fd_set& remoteWriteSet = m_RemoteWriteSets[sidx];
 			if (FD_ISSET(client->sock, &remoteWriteSet)) {
 				while (client->sendBuff.GetUseSize() > 0) {
 					int len = client->sendBuff.GetUseSize();
@@ -414,11 +356,8 @@ bool JNetServerNetworkCore::send() {
 							//	// OnClientDisconnect 이벤트를 받고, true를 받환하면 코어 측에서 연결 종료 처리
 							//	Disconnect(hID);
 							//}
-							if (Disconnect(hID)) {
-#if defined(PRINT_CONSOLE_LOG_ON)
-								cout << "send() return SOCKET_ERROR( " << errCode << ") | hostID: " << hID << endl;
-#endif
-								eventHandler->OnClientDisconnect(hID);
+							if (registDisconnection(hID)) {
+								m_EventHandler->OnClientDisconnect(hID);
 							}
 						}
 						break;
@@ -458,14 +397,32 @@ bool JNetServerNetworkCore::send() {
 					}
 				}
 			}
-#ifdef REMOTE_MAP
-			iter++;
-#endif // REMOTE_MAP
-#ifdef REMOTE_VEC
 			session = session->nextSession;
-#endif // REMOTE_VEC
 		}
 	}
+}
 
+bool JNetCoreServer::registDisconnection(HostID hostID)
+{
+	if (deleteCount++ > DELETE_LIMIT) {
+		return false;
+	}
+
+	auto iter = m_DisconnectWaitSet.find(hostID);
+	if (iter != m_DisconnectWaitSet.end()) {
+		return false;
+	}
+
+	m_DisconnectWaitSet.insert(hostID);
 	return true;
+}
+
+void JNetCoreServer::cleanUpSession()
+{
+	deleteCount = 0;
+
+	for (HostID host : m_DisconnectWaitSet) {
+		m_SessionManager.DeleteSession(host);
+	}
+	m_DisconnectWaitSet.clear();
 }

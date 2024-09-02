@@ -24,7 +24,7 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 #endif // REMOTE_MAP
 #ifdef REMOTE_VEC && !DIRECT_ACCESS_TO_JNETSESSION
 	stJNetSession* remote;
-	if ((remote = netcore->sessionMgr.GetSession(remoteID)) != nullptr) {
+	if ((remote = netcore->m_SessionMgr.GetSession(remoteID)) != nullptr) {
 		if (remote->sendBuff.GetFreeSize() >= msg.GetUseSize()) {
 			remote->sendBuff.Enqueue(msg.GetDequeueBufferPtr(), msg.GetUseSize());
 		}
@@ -39,12 +39,7 @@ void JNetProxy::Send(HostID remoteID, JBuffer& msg) {
 #endif // REMOTE_VEC && !DIRECT_ACCESS_TO_JNETSESSION
 }
 
-//bool JNetProxy::Disconnect(HostID remoteID)
-//{
-//	return false;
-//}
-
-bool JNetProxy::ForcedDisconnect(HostID remoteID)
+void JNetProxy::Disconnect(HostID remoteID)
 {
-	return netcore->ForcedDisconnect(remoteID);
+	return netcore->RequestDisconnection(remoteID);
 }

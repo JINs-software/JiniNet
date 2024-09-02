@@ -4,10 +4,6 @@
 #include "../rapidjson/document.h"
 #include "../rapidjson/writer.h"
 #include "../rapidjson/stringbuffer.h"
-//enum enJPDir {
-//	S2C,	// 0
-//	C2S		// 1
-//};
 
 struct stJParam {
 	std::string type;

@@ -19,37 +19,35 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Include\CommHdr.h" />
     <ClInclude Include="..\..\Include\JMemoryHistory.h" />
     <ClInclude Include="..\..\Include\JNetBatchProcess.h" />
-    <ClInclude Include="..\..\Include\JNetClient.h" />
     <ClInclude Include="..\..\Include\JNetClientEventHandler.h" />
     <ClInclude Include="..\..\Include\JNetCoreConfig.h" />
-    <ClInclude Include="..\..\Include\JNetCoreDefine.h" />
     <ClInclude Include="..\..\Include\JNetEventHandler.h" />
     <ClInclude Include="..\..\Include\JNetPool.h" />
     <ClInclude Include="..\..\Include\JNetProxy.h" />
     <ClInclude Include="..\..\Include\JNetRPC.h" />
-    <ClInclude Include="..\..\Include\JNetServer.h" />
     <ClInclude Include="..\..\Include\JNetServerEventHandler.h" />
-    <ClInclude Include="..\..\Include\JNetServerNetworkCore.h" />
+    <ClInclude Include="..\..\Include\JNetCoreServer.h" />
     <ClInclude Include="..\..\Include\JNetSession.h" />
     <ClInclude Include="..\..\Include\JNetSessionConfig.h" />
     <ClInclude Include="..\..\Include\JNetStub.h" />
     <ClInclude Include="..\..\Include\JNetworkCore.h" />
+    <ClInclude Include="..\..\Include\SocketUtil.h" />
+    <ClInclude Include="..\..\Include\Types.h" />
     <ClInclude Include="Proxy.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Include\JNetBatchProcess.cpp" />
     <ClCompile Include="JMemoryHistory.cpp" />
-    <ClCompile Include="JNetClient.cpp" />
     <ClCompile Include="JNetClientEventHandler.cpp" />
     <ClCompile Include="JNetEventHandler.cpp" />
     <ClCompile Include="JNetProxy.cpp" />
-    <ClCompile Include="JNetServer.cpp" />
     <ClCompile Include="JNetServerEventHandler.cpp" />
-    <ClCompile Include="JNetServerNetworkCore.cpp" />
+    <ClCompile Include="JNetCoreServer.cpp" />
     <ClCompile Include="JNetStub.cpp" />
     <ClCompile Include="JNetworkCore.cpp" />
+    <ClCompile Include="SocketUtil.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -110,6 +108,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)\Library\$(Configuration)</OutDir>
     <IncludePath>$(SolutionDir)Include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(SolutionDir)..\..\0. Utility\RingBuffer\include;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -175,7 +174,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\0. Utility\2. RingBuffer\include;$(SolutionDir)..\..\0. Utility\0. ServerNetwork\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -186,8 +185,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\..\0. Utility\2. RingBuffer\lib\$(Configuration);$(SolutionDir)..\..\0. Utility\0. ServerNetwork\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>NetworkCore.lib;RingBuffer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\..\0. Utility\RingBuffer\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>RingBuffer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

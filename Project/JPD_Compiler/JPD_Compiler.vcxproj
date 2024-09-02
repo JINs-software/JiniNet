@@ -80,6 +80,13 @@
     <OutDir>$(ProjectDir)lib\$(Configuration)</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)</IntDir>
     <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(ProjectDir)rapidjson;$(ExternalIncludePath)</ExternalIncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)lib\$(Configuration)</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)</IntDir>
+    <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>$(ProjectDir)rapidjson;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,7 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)rapidjson;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

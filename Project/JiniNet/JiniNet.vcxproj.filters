@@ -22,27 +22,18 @@
     <Filter Include="JiniNet">
       <UniqueIdentifier>{cac3ad7a-fcf7-4c4e-8dda-5c6219154f19}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JiniNet\JNetClient">
-      <UniqueIdentifier>{252af7cb-79cc-47bd-87b8-19d029f3a764}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JiniNet\JNetServer">
-      <UniqueIdentifier>{ebd498d8-c3c0-4a7a-8ca0-f654791580bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="JiniPool">
       <UniqueIdentifier>{51e3e256-f491-424d-96fb-9ea2410cdf25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{ecb1a0ab-2d45-4dbc-8f89-ddd8f3a2f885}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\JNetClientEventHandler.h">
       <Filter>JNetEventHandler</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\JNetClient.h">
-      <Filter>JiniNet\JNetClient</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\JNetServer.h">
-      <Filter>JiniNet\JNetServer</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\JNetServerNetworkCore.h">
+    <ClInclude Include="..\..\Include\JNetCoreServer.h">
       <Filter>JNetworkCore</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\JNetProxy.h">
@@ -84,8 +75,14 @@
     <ClInclude Include="..\..\Include\JNetCoreConfig.h">
       <Filter>JNetworkCore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\JNetCoreDefine.h">
-      <Filter>JNetworkCore</Filter>
+    <ClInclude Include="..\..\Include\CommHdr.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\SocketUtil.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Types.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -94,12 +91,6 @@
     </ClCompile>
     <ClCompile Include="JNetStub.cpp">
       <Filter>RPC\JNetStub</Filter>
-    </ClCompile>
-    <ClCompile Include="JNetClient.cpp">
-      <Filter>JiniNet\JNetClient</Filter>
-    </ClCompile>
-    <ClCompile Include="JNetServer.cpp">
-      <Filter>JiniNet\JNetServer</Filter>
     </ClCompile>
     <ClCompile Include="JNetEventHandler.cpp">
       <Filter>JNetEventHandler</Filter>
@@ -113,12 +104,14 @@
     <ClCompile Include="JNetworkCore.cpp">
       <Filter>JNetworkCore</Filter>
     </ClCompile>
-    <ClCompile Include="JNetServerNetworkCore.cpp">
+    <ClCompile Include="JNetCoreServer.cpp">
       <Filter>JNetworkCore</Filter>
     </ClCompile>
     <ClCompile Include="JMemoryHistory.cpp">
       <Filter>JiniPool</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Include\JNetBatchProcess.cpp" />
+    <ClCompile Include="SocketUtil.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

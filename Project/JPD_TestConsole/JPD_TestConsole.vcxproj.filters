@@ -18,8 +18,5 @@
     <None Include="json\RPCFightGame.json">
       <Filter>json</Filter>
     </None>
-    <None Include="json\OnewayFightGame.json">
-      <Filter>json</Filter>
-    </None>
   </ItemGroup>
 </Project>

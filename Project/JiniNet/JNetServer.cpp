@@ -1,35 +1,45 @@
 #include "JNetServer.h"
 
+using namespace std;
+
 JNetServer::JNetServer(bool interactive) {
-	networkCore = new JNetServerNetworkCore();
-	if (!interactive) {
-		networkCore->SetOneway();
-	}
-	batchProcess = new JNetBatchProcess();
-	recvBuff = new JBuffer(SERV_RECV_BUFF_SIZE);
-	sendBuff = new JBuffer(SERV_SEND_BUFF_SIZE);
+	m_NetworkCore = new JNetCoreServer(!interactive);
+	m_BatchProcess = new JNetBatchProcess();
 }
 
-void JNetServer::FrameMove()
+void JNetServer::Start(const stServerStartParam& param, long msecPerFrame)
 {
-	networkCore->Receive();
+	m_NetworkCore->Start(param);
 
-	// Batch Proccessing..
-	batchProcess->BatchProcess();
+	timeBeginPeriod(1);
+	
+	uint16	frameDelta;
+	clock_t timeStamp = clock();
+	clock_t accumulation = 0;
+	while (true) {
+		clock_t timeNow = clock();
+		clock_t timeDuration = timeNow - timeStamp;
+		timeStamp = timeNow;
+		accumulation += timeDuration;
+		frameDelta = accumulation / msecPerFrame;
+		accumulation %= msecPerFrame;
+		FrameMove(frameDelta);
+	}
 
-	networkCore->Send();
+	timeEndPeriod(1);
 }
-void JNetServer::FrameMove(uint16 loopDelta) {
+
+void JNetServer::FrameMove(uint16 frameDelta) {
 #if defined(_DEBUG)
 	static time_t logLap = 0;
 #endif
 
-	networkCore->Receive();
+	m_NetworkCore->Receive();
 
 	// Batch Proccessing..
-	batchProcess->BatchProcess(loopDelta);
+	m_BatchProcess->BatchProcess(frameDelta);
 
-	networkCore->Send();
+	m_NetworkCore->Send();
 	
 #if defined(_DEBUG)
 	if (clock() - logLap > CONSOLE_PRINT_LOG_CYCLE_PARAM) {
@@ -40,8 +50,4 @@ void JNetServer::FrameMove(uint16 loopDelta) {
 	}
 #endif
 
-}
-
-void JNetServer::ConsolePrintLog() {
-	cout << "JNetSession count: " << this->networkCore->GetConnectedSessionCnt() << endl;
 }

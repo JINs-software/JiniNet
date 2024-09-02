@@ -133,7 +133,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="json\jpd.json" />
-    <None Include="json\OnewayFightGame.json" />
     <None Include="json\RPCFightGame.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

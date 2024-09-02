@@ -12,5 +12,5 @@ public:
 	virtual RpcID* GetRpcList();
 	virtual int GetRpcListCount();
 
-	virtual bool ProcessReceivedMessage(HostID remote, JBuffer& jbuff);
+	virtual void ProcessReceivedMessage(HostID remote, JBuffer& jbuff);
 };
