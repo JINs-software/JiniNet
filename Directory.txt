@@ -1,6 +1,0 @@
-(1) .\JiniNet\Include: JiniNet 라이브러리 헤더 파일 모음
-(2) .\JiniNet\Library: JiniNet 라이브러리 모음
-	- JiniNetServer.lib
-	- JiniNetClient.lib
-	- JiniPool.lib
-(3) .\JiniNet\Utility: JPD(JiniNet Procedure Description) 컴파일러 등 JiniNet 유틸리티 모음

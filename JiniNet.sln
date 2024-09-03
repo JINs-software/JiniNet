@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34309.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JPD_Compiler", "Project\JPD_Compiler\JPD_Compiler.vcxproj", "{F2A93B57-6926-44CF-909D-D48AEB37918B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JPD_TestConsole", "Project\JPD_TestConsole\JPD_TestConsole.vcxproj", "{30C38F69-6E27-40FE-80A0-51EF89A2EE70}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JiniNet", "Project\JiniNet\JiniNet.vcxproj", "{C0B25F54-48EA-4A93-9517-3A27A938913E}"
 EndProject
 Global
@@ -17,22 +13,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Debug|x64.ActiveCfg = Debug|x64
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Debug|x64.Build.0 = Debug|x64
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Debug|x86.ActiveCfg = Debug|Win32
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Debug|x86.Build.0 = Debug|Win32
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Release|x64.ActiveCfg = Release|x64
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Release|x64.Build.0 = Release|x64
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Release|x86.ActiveCfg = Release|Win32
-		{F2A93B57-6926-44CF-909D-D48AEB37918B}.Release|x86.Build.0 = Release|Win32
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Debug|x64.ActiveCfg = Debug|x64
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Debug|x64.Build.0 = Debug|x64
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Debug|x86.ActiveCfg = Debug|Win32
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Debug|x86.Build.0 = Debug|Win32
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Release|x64.ActiveCfg = Release|x64
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Release|x64.Build.0 = Release|x64
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Release|x86.ActiveCfg = Release|Win32
-		{30C38F69-6E27-40FE-80A0-51EF89A2EE70}.Release|x86.Build.0 = Release|Win32
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Debug|x64.ActiveCfg = Debug|x64
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Debug|x64.Build.0 = Debug|x64
 		{C0B25F54-48EA-4A93-9517-3A27A938913E}.Debug|x86.ActiveCfg = Debug|Win32
